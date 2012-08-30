@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Ivana Chingovska <ivana.chingovska@idiap.ch>
-#Sun Jul  8 20:35:55 CEST 2012
+# Ivana Chingovska <ivana.chingovska@idiap.ch>
+# Sun Jul  8 20:35:55 CEST 2012
 
 from setuptools import setup, find_packages
 
@@ -9,19 +9,26 @@ from setuptools import setup, find_packages
 setup(
 
     name='antispoofing.lbp',
-    version='1.0',
+    version='1.0.0',
     description='Texture (LBP) based counter-measures for the REPLAY-ATTACK database',
-    url='http://github.com/bioidiap/antispoofing.lbp',
-    license='LICENSE.txt',
-    author_email='Ivana Chingovska <ivana.chingovska@idiap.ch>',
-    long_description=open('doc/howto.rst').read(),
+    url='http://pypi.python.org/pypi/antispoofing.lbp',
+    license='GPLv3',
+    author='Ivana Chingovska',
+    author_email='ivana.chingovska@idiap.ch',
+    long_description=open('README.rst').read(),
 
     # This line is required for any distutils based packaging.
     packages=find_packages(),
+    include_package_data=True,
+    zip_safe=True,
+
+    namespace_packages=[
+      "antispoofing",
+      ],
 
     install_requires=[
-        "bob",      # base signal proc./machine learning library
-        "argparse", # better option parsing
+      "setuptools",
+      "bob >= 1.0.0, < 1.1.0",
     ],
 
     entry_points={
