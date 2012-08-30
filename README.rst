@@ -140,7 +140,7 @@ all the scripts) to specify the root directory containing the database files.
 That would be the directory that *contains* the sub-directories ``train``,
 ``test``, ``devel`` and ``face-locations``.
 
-Calculate the lbp features
+Calculate the LBP features
 ==========================
 
 The first stage of the process is calculating the feature vectors, which are
