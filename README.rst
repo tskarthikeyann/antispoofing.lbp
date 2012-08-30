@@ -1,9 +1,10 @@
-Counter-Measures for Face Spoofing Attacks based on Local Binary Patterns (LBP)
-===============================================================================
+=============================================================================
+ Counter-Measures to Face Spoofing Attacks using Local Binary Patterns (LBP)
+=============================================================================
 
-This package implements the LBP counter-measure to spoofing attacks to
-face recognition systems as described at the paper `On the Effectiveness of
-Local Binary Patterns in Face Anti-spoofing`, by Chingovska, Anjos and Marcel,
+This package implements the LBP counter-measure to spoofing attacks to face
+recognition systems as described at the paper `On the Effectiveness of Local
+Binary Patterns in Face Anti-spoofing`, by Chingovska, Anjos and Marcel,
 presented at the IEEE BioSIG 2012 meeting.
 
 If you use this package and/or its results, please cite the following
