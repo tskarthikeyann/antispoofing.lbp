@@ -7,7 +7,7 @@
 import bob
 import numpy
 
-def make_pca(data, perc, norm=False):
+def make_pca(data, perc):
   """ Creates a new LinearMachine for PCA reduction of data, using the training data given as argument. Returns a bob.machine.LinearMachine containing a numpy.ndarray of the most important eigenvectors.
 
   Keyword parameters:
@@ -29,7 +29,7 @@ def make_pca(data, perc, norm=False):
     dataarray.extend(data)
   else: dataarray = data
 
-  T = bob.trainer.SVDPCATrainer(zscore_convert=norm) # zero-mean, unit-variance will be performed prior to reduction
+  T = bob.trainer.SVDPCATrainer() # zero-mean, unit-variance will be performed prior to reduction
   params = T.train(dataarray) # params contain a tuple (eigenvecetors, eigenvalues) sorted in descending order
 
   eigvalues = params[1]

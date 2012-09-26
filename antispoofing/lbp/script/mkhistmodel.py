@@ -9,12 +9,13 @@ import os, sys
 import argparse
 import bob
 import numpy
+import xbob.db.replay
 
-def create_full_dataset(files):
+def create_full_dataset(indir, objects):
   """Creates a full dataset matrix out of all the specified files"""
   dataset = None
-  for key, filename in files.items():
-    filename = os.path.expanduser(filename)
+  for obj in objects:
+    filename = os.path.expanduser(obj.make_path(indir, '.hdf5'))
     fvs = bob.io.load(filename)
     if dataset is None:
       dataset = fvs
@@ -29,7 +30,7 @@ def main():
   INPUT_DIR = os.path.join(basedir, 'lbp_features')
   OUTPUT_DIR = os.path.join(basedir, 'res')
 
-  protocols = bob.db.replay.Database().protocols()
+  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
   
   parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the histogram features of all the videos')
@@ -47,12 +48,13 @@ def main():
   print "Loading input files..."
 
   # loading the input files
-  db = bob.db.replay.Database()
+  db = xbob.db.replay.Database()
 
-  process_train_real = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='train', cls='real')
+  #process_train_real = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='train', cls='real')
+  process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
 
   # create the full datasets from the file data
-  train_real = create_full_dataset(process_train_real);
+  train_real = create_full_dataset(args.inputdir, process_train_real);
   
   print "Creating the model..."
 

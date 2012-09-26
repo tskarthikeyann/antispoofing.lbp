@@ -13,13 +13,14 @@ def main():
   import bob
   import numpy
   import math
+  import xbob.db.replay
 
   basedir = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
 
   INPUT_DIR = os.path.join(basedir, 'database')
   OUTPUT_DIR = os.path.join(basedir, 'lbp_features')
 
-  protocols = bob.db.replay.Database().protocols()
+  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
 
   parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str,
@@ -40,31 +41,26 @@ def main():
   from .. import spoof
   from .. import faceloc
 
-  db = bob.db.replay.Database()
+  db = xbob.db.replay.Database()
 
   if args.protocol:
-    process = db.files(directory=args.inputdir, extension='.mov', protocol=args.protocol)
+    process = db.objects(protocol=args.protocol)
   else:
-    process = db.files(directory=args.inputdir, extension='.mov')
+    process = db.objects(protocol=args.protocol)
 
-  # where to find the face bounding boxes
-  faceloc_dir = os.path.join(args.inputdir, 'face-locations')
-  
   counter = 0
   # process each video
-  for key, filename in process.items():
+  for obj in process:
     counter += 1
-    filename = os.path.expanduser(filename)
-    input = bob.io.VideoReader(filename)
+    input = bob.io.VideoReader(obj.videofile(directory=args.inputdir))
 
     # loading the face locations
    
-    flocfile = os.path.expanduser(db.paths([key], faceloc_dir, '.face')[0])
-    locations = faceloc.read_face(flocfile)
+    locations = faceloc.read_face(obj.facefile(args.inputdir))
     locations = faceloc.expand_detections(locations, input.number_of_frames)
     sz = args.normfacesize # the size of the normalized face box
    
-    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (filename,
+    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (obj.path,
       input.number_of_frames, counter, len(process)))
 
     # start the work here...
@@ -73,6 +69,7 @@ def main():
     histdata = numpy.ndarray((0,args.blocks * args.blocks * lbphistlength[args.lbptype]), 'float64') # the numpy.ndarray, each row is the histogram of one frame
 
     numvf = 0 # number of valid frames in the video (will be smaller then the total number of frames if a face is not detected or a very small face is detected in a frame when face lbp are calculated  
+    validframes = [] # list with the indices of the valid frames
 
     for k in range(0, vin.shape[0]): 
       frame = bob.ip.rgb_to_gray(vin[k,:,:,:])
@@ -80,14 +77,16 @@ def main():
       sys.stdout.flush()
       hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise
       numvf = numvf + vf
+      validframes.append(vf) # add 0 if it is not a valid frame, 1 in contrary
       if vf == 1: # if it is a valid frame, add its histogram into the list of frame feature vectors
         histdata = numpy.append(histdata, hist.reshape([1, hist.size]), axis = 0)
-    
+      
     sys.stdout.write('\n')
     sys.stdout.flush()
 
     # saves the output
-    db.save_one(key, histdata, directory=args.directory, extension='.hdf5')
+    obj.save(histdata, directory = args.directory, extension='.hdf5')
+    obj.save(numpy.array(validframes), directory = os.path.join(args.directory, 'validframes'), extension='.hdf5')
 
   return 0
 

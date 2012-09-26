@@ -12,12 +12,13 @@ import os, sys
 import argparse
 import bob
 import numpy
+import xbob.db.replay
 
-def create_full_dataset(files):
+def create_full_dataset(indir, objects):
   """Creates a full dataset matrix out of all the specified files"""
   dataset = None
-  for key, filename in files.items():
-    filename = os.path.expanduser(filename)
+  for obj in objects:
+    filename = os.path.expanduser(obj.make_path(indir, '.hdf5'))
     fvs = bob.io.load(filename)
     if dataset is None:
       dataset = fvs
@@ -25,6 +26,30 @@ def create_full_dataset(files):
       dataset = numpy.append(dataset, fvs, axis = 0)
   return dataset
 
+def map_scores(indir, score_dir, objects, score_list):
+  """Maps frame scores to frames of the objects. Writes the scores for each frame in a file, NaN for invalid frames
+
+  Keyword parameters:
+
+  indir: the directory with the files with valid frames
+
+  score_dir: the directory where the score files are going to be written
+
+  objects: list of objects
+
+  score_list: list of scores for the given objects
+  """
+  num_scores = 0 # counter for how many valid frames have been processed so far in total of all the objects
+  for obj in objects:
+    filename = os.path.expanduser(obj.make_path(indir, '.hdf5'))
+    vf = bob.io.load(filename)
+    vf_indices = list(numpy.where(vf == 1)[0]) # indices of the valid frames of the object
+    nvf_indices = list(numpy.where(vf == 0)[0]) # indices of the invalid frames of the object
+    scores = numpy.ndarray((len(vf), 1), dtype='float64') 
+    scores[vf_indices] = score_list[num_scores:num_scores + len(vf_indices)] # set the scores of the valid frames
+    scores[nvf_indices] = numpy.NaN # set NaN for the scores of the invalid frames
+    num_scores += len(vf_indices) # increase the nu,ber of valid scores that have been already maped
+    obj.save(scores, score_dir, '.hdf5') # save the scores
 
 def main():
 
@@ -33,7 +58,7 @@ def main():
   INPUT_DIR = os.path.join(basedir, 'lbp_features')
   OUTPUT_DIR = os.path.join(basedir, 'res')
 
-  protocols = bob.db.replay.Database().protocols()
+  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
 
   parser = argparse.ArgumentParser(description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -43,6 +68,7 @@ def main():
   parser.add_argument('-r', '--pca_reduction', action='store_true', dest='pca_reduction', default=False, help='If set, PCA dimensionality reduction will be performed to the data before doing LDA')
   parser.add_argument('-e', '--energy', type=str, dest="energy", default='0.99', help='The energy which needs to be preserved after the dimensionality reduction if PCA is performed prior to LDA')
   parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str, dest="protocol", default='grandtest', help='The protocol type may be specified instead of the the id switch to subselect a smaller number of files to operate on', choices=protocols) 
+  parser.add_argument('-s', '--score', dest='score', action='store_true', default=False, help='If set, the final classification scores of all the frames will be dumped in a file')
 
   from .. import ml
   from ..ml import pca, norm
@@ -58,19 +84,19 @@ def main():
 
   print "Loading input files..."
   # loading the input files
-  db = bob.db.replay.Database()
+  db = xbob.db.replay.Database()
 
-  process_train_real = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='train', cls='real')
-  process_train_attack = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='train', cls='attack')
-  process_devel_real = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='devel', cls='real')
-  process_devel_attack = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='devel', cls='attack')
-  process_test_real = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='test', cls='real')
-  process_test_attack = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='test', cls='attack')
+  process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
+  process_train_attack = db.objects(protocol=args.protocol, groups='train', cls='attack')
+  process_devel_real = db.objects(protocol=args.protocol, groups='devel', cls='real')
+  process_devel_attack = db.objects(protocol=args.protocol, groups='devel', cls='attack')
+  process_test_real = db.objects(protocol=args.protocol, groups='test', cls='real')
+  process_test_attack = db.objects(protocol=args.protocol, groups='test', cls='attack')
 
   # create the full datasets from the file data
-  train_real = create_full_dataset(process_train_real); train_attack = create_full_dataset(process_train_attack); 
-  devel_real = create_full_dataset(process_devel_real); devel_attack = create_full_dataset(process_devel_attack); 
-  test_real = create_full_dataset(process_test_real); test_attack = create_full_dataset(process_test_attack); 
+  train_real = create_full_dataset(args.inputdir, process_train_real); train_attack = create_full_dataset(args.inputdir, process_train_attack); 
+  devel_real = create_full_dataset(args.inputdir, process_devel_real); devel_attack = create_full_dataset(args.inputdir, process_devel_attack); 
+  test_real = create_full_dataset(args.inputdir, process_test_real); test_attack = create_full_dataset(args.inputdir, process_test_attack); 
 
   if args.normalize:  # normalization in the range [-1, 1] (recommended by LIBSVM)
     train_data = numpy.concatenate((train_real, train_attack), axis=0) 
@@ -83,7 +109,7 @@ def main():
     train = bob.io.Arrayset() # preparing the train data for PCA (putting them altogether into bob.io.Arrayset)
     train.extend(train_real)
     train.extend(train_attack)
-    pca_machine = pca.make_pca(train, energy, False) # performing PCA
+    pca_machine = pca.make_pca(train, energy) # performing PCA
     train_real = pca.pcareduce(pca_machine, train_real); train_attack = pca.pcareduce(pca_machine, train_attack)
     devel_real = pca.pcareduce(pca_machine, devel_real); devel_attack = pca.pcareduce(pca_machine, devel_attack)
     test_real = pca.pcareduce(pca_machine, test_real); test_attack = pca.pcareduce(pca_machine, test_attack)
@@ -104,11 +130,19 @@ def main():
   test_real_out = svm_predict(svm_machine, test_real);
   test_attack_out = svm_predict(svm_machine, test_attack);
 
- # it is expected that the scores of the real accesses are always higher then the scores of the attacks. Therefore, a check is first made, if the average of the scores of real accesses is smaller then the average of the scores of the attacks, all the scores are inverted by multiplying with -1.
+  # it is expected that the scores of the real accesses are always higher then the scores of the attacks. Therefore, a check is first made, if the average of the scores of real accesses is smaller then the average of the scores of the attacks, all the scores are inverted by multiplying with -1.
   if numpy.mean(devel_real_out) < numpy.mean(devel_attack_out):
     devel_real_out = devel_real_out * -1; devel_attack_out = devel_attack_out * -1
     test_real_out = test_real_out * -1; test_attack_out = test_attack_out * -1
     
+  if args.score: # save the scores in a file
+    vf_dir = os.path.join(args.inputdir, 'validframes') # input directory with the files with valid frames
+    score_dir = os.path.join(args.outputdir, 'scores') # output directory for the socre files
+    map_scores(vf_dir, score_dir, process_devel_real, numpy.reshape(devel_real_out, [len(devel_real_out), 1])) 
+    map_scores(vf_dir, score_dir, process_devel_attack, numpy.reshape(devel_attack_out, [len(devel_attack_out), 1]))
+    map_scores(vf_dir, score_dir, process_test_real, numpy.reshape(test_real_out, [len(test_real_out), 1]))
+    map_scores(vf_dir, score_dir, process_test_attack, numpy.reshape(test_attack_out, [len(test_attack_out), 1]))
+
   # calculation of the error rates
   thres = bob.measure.eer_threshold(devel_attack_out, devel_real_out)
   dev_far, dev_frr = bob.measure.farfrr(devel_attack_out, devel_real_out, thres)

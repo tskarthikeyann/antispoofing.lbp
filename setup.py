@@ -29,6 +29,7 @@ setup(
     install_requires=[
       "setuptools",
       "bob >= 1.0.0, < 1.1.0",
+      "xbob.db.replay",
     ],
 
     entry_points={

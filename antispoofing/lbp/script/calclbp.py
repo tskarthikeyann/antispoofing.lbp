@@ -13,13 +13,14 @@ def main():
   import bob
   import numpy
   import math
+  import xbob.db.replay
   
   basedir = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
 
   INPUT_DIR = os.path.join(basedir, 'database')
   OUTPUT_DIR = os.path.join(basedir, 'lbp_features')
 
-  protocols = bob.db.replay.Database().protocols()
+  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
 
   parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the videos to be treated by this procedure (defaults to "%(default)s")')
@@ -39,30 +40,26 @@ def main():
   from .. import spoof
   from .. import faceloc
 
-  db = bob.db.replay.Database()
+  db = xbob.db.replay.Database()
 
   if args.protocol:
-    process = db.files(directory=args.inputdir, extension='.mov', protocol=args.protocol)
+    process = db.objects(protocol=args.protocol)
   else:
-    process = db.files(directory=args.inputdir, extension='.mov')
-
-  # where to find the face bounding boxes
-  faceloc_dir = os.path.join(args.inputdir, 'face-locations')
+    process = db.objects(protocol=args.protocol)
 
   counter = 0
   # process each video
-  for key, filename in process.items():
+  for obj in process:
     counter += 1
-    filename = os.path.expanduser(filename)
-    input = bob.io.VideoReader(filename)
-    
+    input = bob.io.VideoReader(obj.videofile(directory=args.inputdir))
+
     # loading the face locations
-    flocfile = os.path.expanduser(db.paths([key], faceloc_dir, '.face')[0])
-    locations = faceloc.read_face(flocfile)
+   
+    locations = faceloc.read_face(obj.facefile(args.inputdir))
     locations = faceloc.expand_detections(locations, input.number_of_frames)
     sz = args.normfacesize # the size of the normalized face box
-
-    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (filename,
+   
+    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (obj.path,
       input.number_of_frames, counter, len(process)))
 
     # start the work here...
@@ -87,7 +84,7 @@ def main():
 
     # saves the output
     arr = numpy.array(data, dtype='float64')
-    db.save_one(key, arr.reshape([1,arr.size]), directory=args.directory, extension='.hdf5')
+    obj.save(arr.reshape([1,arr.size]), directory = args.directory, extension='.hdf5')
 
   return 0
 
