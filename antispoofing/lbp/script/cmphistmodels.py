@@ -115,7 +115,6 @@ def main():
   if args.score: # save the scores in a file
     vf_dir = os.path.join(args.inputdir, 'validframes') # input directory with the files with valid frames
     score_dir = os.path.join(args.outputdir, 'scores') # output directory for the socre files
-    import ipdb; ipdb.set_trace()
     map_scores(vf_dir, score_dir, process_devel_real, sc_devel_realmodel[0]) 
     map_scores(vf_dir, score_dir, process_devel_attack, sc_devel_realmodel[1])
     map_scores(vf_dir, score_dir, process_test_real, sc_test_realmodel[0])

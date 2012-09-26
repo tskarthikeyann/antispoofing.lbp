@@ -126,7 +126,6 @@ def main():
   test_real_out = lda.get_scores(lda_machine, test_real)
   test_attack_out = lda.get_scores(lda_machine, test_attack)
 
-  import ipdb; ipdb.set_trace()
   # it is expected that the scores of the real accesses are always higher then the scores of the attacks. Therefore, a check is first made, if the average of the scores of real accesses is smaller then the average of the scores of the attacks, all the scores are inverted by multiplying with -1.
   if numpy.mean(devel_real_out) < numpy.mean(devel_attack_out):
     devel_real_out = devel_real_out * -1; devel_attack_out = devel_attack_out * -1
