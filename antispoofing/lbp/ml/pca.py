@@ -13,7 +13,7 @@ def make_pca(data, perc):
   Keyword parameters:
 
   data
-    numpy.ndarray or bob.io.Arrayset containing the training data which will be used to calculate the PCA parameters
+    numpy.ndarray containing the training data which will be used to calculate the PCA parameters
 
   perc
     the percentage of energy which should be conserved when reducing the dimensions
@@ -22,15 +22,8 @@ def make_pca(data, perc):
     if set to True, unit-variance normalization will be done to the data prior to reduction (zero mean is done by default anyway)
 """
 
-  # checking the type of the data provided for reduction
-  if type(data) == numpy.ndarray:
-    # putting the numpy.ndarray data into Arrayset
-    dataarray = bob.io.Arrayset()
-    dataarray.extend(data)
-  else: dataarray = data
-
   T = bob.trainer.SVDPCATrainer() # zero-mean, unit-variance will be performed prior to reduction
-  params = T.train(dataarray) # params contain a tuple (eigenvecetors, eigenvalues) sorted in descending order
+  params = T.train(data) # params contain a tuple (eigenvecetors, eigenvalues) sorted in descending order
 
   eigvalues = params[1]
   
@@ -52,25 +45,17 @@ def make_pca(data, perc):
 
 
 def pcareduce(machine, data):
-  """ Reduces the dimension of the data, using the given bob.machine.LinearMachine (projects each of the data feature vector in the lower dimensional space). Returns numpy.ndarray of the feature vectors with reduced dimensionality. The accepted input data can be in numpy.ndarray format or bob.io.Arrayset format.
+  """ Reduces the dimension of the data, using the given bob.machine.LinearMachine (projects each of the data feature vector in the lower dimensional space). Returns numpy.ndarray of the feature vectors with reduced dimensionality. The accepted input data is in numpy.ndarray format
 
   Keyword parameters:
 
   machine
     bob.machine.LinearMachine
   data
-    numpy.ndarray or bob.io.Arrayset() containing the data which need to be reduced
+    numpy.ndarray containing the data which need to be reduced
 
   perc
     the percentage of energy which should be conserved when reducing the dimensions
   """
-  
-  # checking the type of the data provided for reduction
-  if type(data) == numpy.ndarray:
-    # putting the numpy.ndarray data into Arrayset
-    dataarray = bob.io.Arrayset()
-    dataarray.extend(data)
-    return numpy.vstack(dataarray.foreach(machine))  #the new vectors with reduced dimensionality
- 
-  # if the data is bob.io.Arrayset
-  return numpy.vstack(data.foreach(machine))   #the new vectors with reduced dimensionality
+
+  return numpy.vstack([machine(d) for d in data])

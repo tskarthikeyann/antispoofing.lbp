@@ -106,9 +106,8 @@ def main():
     test_real = norm.norm_range(test_real, mins, maxs, -1, 1); test_attack = norm.norm_range(test_attack, mins, maxs, -1, 1)
   
   if args.pca_reduction: # PCA dimensionality reduction of the data
-    train = bob.io.Arrayset() # preparing the train data for PCA (putting them altogether into bob.io.Arrayset)
-    train.extend(train_real)
-    train.extend(train_attack)
+    print "Running PCA reduction..."
+    train=numpy.append(train_real, train_attack, axis=0)
     pca_machine = pca.make_pca(train, energy) # performing PCA
     train_real = pca.pcareduce(pca_machine, train_real); train_attack = pca.pcareduce(pca_machine, train_attack)
     devel_real = pca.pcareduce(pca_machine, devel_real); devel_attack = pca.pcareduce(pca_machine, devel_attack)
