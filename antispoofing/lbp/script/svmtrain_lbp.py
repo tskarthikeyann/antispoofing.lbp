@@ -48,7 +48,7 @@ def map_scores(indir, score_dir, objects, score_list):
     scores = numpy.ndarray((len(vf), 1), dtype='float64') 
     scores[vf_indices] = score_list[num_scores:num_scores + len(vf_indices)] # set the scores of the valid frames
     scores[nvf_indices] = numpy.NaN # set NaN for the scores of the invalid frames
-    num_scores += len(vf_indices) # increase the nu,ber of valid scores that have been already maped
+    num_scores += len(vf_indices) # increase the nuber of valid scores that have been already maped
     obj.save(scores, score_dir, '.hdf5') # save the scores
 
 def main():
@@ -128,11 +128,14 @@ def main():
   devel_attack_out = svm_predict(svm_machine, devel_attack);
   test_real_out = svm_predict(svm_machine, test_real);
   test_attack_out = svm_predict(svm_machine, test_attack);
+  train_real_out = svm_predict(svm_machine, train_real);
+  train_attack_out = svm_predict(svm_machine, train_attack);
 
   # it is expected that the scores of the real accesses are always higher then the scores of the attacks. Therefore, a check is first made, if the average of the scores of real accesses is smaller then the average of the scores of the attacks, all the scores are inverted by multiplying with -1.
   if numpy.mean(devel_real_out) < numpy.mean(devel_attack_out):
     devel_real_out = devel_real_out * -1; devel_attack_out = devel_attack_out * -1
     test_real_out = test_real_out * -1; test_attack_out = test_attack_out * -1
+    train_real_out = train_real_out * -1; train_attack_out = train_attack_out * -1
     
   if args.score: # save the scores in a file
     vf_dir = os.path.join(args.inputdir, 'validframes') # input directory with the files with valid frames
@@ -141,6 +144,8 @@ def main():
     map_scores(vf_dir, score_dir, process_devel_attack, numpy.reshape(devel_attack_out, [len(devel_attack_out), 1]))
     map_scores(vf_dir, score_dir, process_test_real, numpy.reshape(test_real_out, [len(test_real_out), 1]))
     map_scores(vf_dir, score_dir, process_test_attack, numpy.reshape(test_attack_out, [len(test_attack_out), 1]))
+    map_scores(vf_dir, score_dir, process_train_real, numpy.reshape(train_real_out, [len(train_real_out), 1]))
+    map_scores(vf_dir, score_dir, process_train_attack, numpy.reshape(train_attack_out, [len(train_attack_out), 1]))
 
   # calculation of the error rates
   thres = bob.measure.eer_threshold(devel_attack_out, devel_real_out)

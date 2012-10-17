@@ -124,12 +124,15 @@ def main():
   devel_attack_out = lda.get_scores(lda_machine, devel_attack)
   test_real_out = lda.get_scores(lda_machine, test_real)
   test_attack_out = lda.get_scores(lda_machine, test_attack)
+  train_real_out = lda.get_scores(lda_machine, train_real)
+  train_attack_out = lda.get_scores(lda_machine, train_attack)
 
   # it is expected that the scores of the real accesses are always higher then the scores of the attacks. Therefore, a check is first made, if the average of the scores of real accesses is smaller then the average of the scores of the attacks, all the scores are inverted by multiplying with -1.
   if numpy.mean(devel_real_out) < numpy.mean(devel_attack_out):
     devel_real_out = devel_real_out * -1; devel_attack_out = devel_attack_out * -1
     test_real_out = test_real_out * -1; test_attack_out = test_attack_out * -1
-     
+    train_real_out = train_real_out * -1; train_attack_out = train_attack_out * -1     
+
   if args.score: # save the scores in a file
     vf_dir = os.path.join(args.inputdir, 'validframes') # input directory with the files with valid frames
     score_dir = os.path.join(args.outputdir, 'scores') # output directory for the socre files
@@ -137,7 +140,9 @@ def main():
     map_scores(vf_dir, score_dir, process_devel_attack, numpy.reshape(devel_attack_out, [len(devel_attack_out), 1]))
     map_scores(vf_dir, score_dir, process_test_real, numpy.reshape(test_real_out, [len(test_real_out), 1]))
     map_scores(vf_dir, score_dir, process_test_attack, numpy.reshape(test_attack_out, [len(test_attack_out), 1]))
-
+    map_scores(vf_dir, score_dir, process_train_real, numpy.reshape(train_real_out, [len(train_real_out), 1]))
+    map_scores(vf_dir, score_dir, process_train_attack, numpy.reshape(train_attack_out, [len(train_attack_out), 1]))
+    
   # calculation of the error rates
   thres = bob.measure.eer_threshold(devel_attack_out, devel_real_out)
   dev_far, dev_frr = bob.measure.farfrr(devel_attack_out, devel_real_out, thres)

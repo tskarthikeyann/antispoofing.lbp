@@ -89,10 +89,13 @@ def main():
   process_devel_attack = db.objects(protocol=args.protocol, groups='devel', cls='attack')
   process_test_real = db.objects(protocol=args.protocol, groups='test', cls='real')
   process_test_attack = db.objects(protocol=args.protocol, groups='test', cls='attack')
+  process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
+  process_train_attack = db.objects(protocol=args.protocol, groups='train', cls='attack')
 
   # create the full datasets from the file data
   devel_real = create_full_dataset(args.inputdir, process_devel_real); devel_attack = create_full_dataset(args.inputdir, process_devel_attack); 
   test_real = create_full_dataset(args.inputdir, process_test_real); test_attack = create_full_dataset(args.inputdir, process_test_attack); 
+  train_real = create_full_dataset(args.inputdir, process_train_real); train_attack = create_full_dataset(args.inputdir, process_train_attack); 
 
   print "Loading the models..."
   # loading the histogram models
@@ -106,11 +109,13 @@ def main():
   # calculating the comparison scores with chi2 distribution for each protocol subset   
   sc_devel_realmodel = chi2.cmphistbinschimod(model_hist_real, (devel_real, devel_attack))
   sc_test_realmodel = chi2.cmphistbinschimod(model_hist_real, (test_real, test_attack))
+  sc_train_realmodel = chi2.cmphistbinschimod(model_hist_real, (train_real, train_attack))
 
   print "Saving the results in a file"
   # It is expected that the positives always have larger scores. Therefore, it is necessary to "invert" the scores by multiplying them by -1 (the chi-square test gives smaller scores to the data from the similar distribution)
   sc_devel_realmodel = (sc_devel_realmodel[0] * -1, sc_devel_realmodel[1] * -1)
   sc_test_realmodel = (sc_test_realmodel[0] * -1, sc_test_realmodel[1] * -1)
+  sc_train_realmodel = (sc_train_realmodel[0] * -1, sc_train_realmodel[1] * -1)
 
   if args.score: # save the scores in a file
     vf_dir = os.path.join(args.inputdir, 'validframes') # input directory with the files with valid frames
@@ -119,7 +124,9 @@ def main():
     map_scores(vf_dir, score_dir, process_devel_attack, sc_devel_realmodel[1])
     map_scores(vf_dir, score_dir, process_test_real, sc_test_realmodel[0])
     map_scores(vf_dir, score_dir, process_test_attack, sc_test_realmodel[1])
- 
+    map_scores(vf_dir, score_dir, process_train_real, sc_train_realmodel[0])
+    map_scores(vf_dir, score_dir, process_train_attack, sc_train_realmodel[1])
+
   perftable, eer_thres, mhter_thres = perf.performance_table(sc_test_realmodel, sc_devel_realmodel, "CHI-2 comparison, RESULTS")
   tf = open(os.path.join(args.outputdir, 'perf_table.txt'), 'w')
   tf.write(perftable)
