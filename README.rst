@@ -43,7 +43,7 @@ installed **prior** to try using the programs described in this package. Visit
 `the REPLAY-ATTACK database portal
 <https://www.idiap.ch/dataset/replayattack>`_ for more information.
 
-This satellite package can also work with the CASIA_FASD database available at <http://www.cbsr.ia.ac.cn/english/FaceAntiSpoof%20Databases.asp>`_
+This satellite package can also work with the `CASIA_FASD database <http://www.cbsr.ia.ac.cn/english/FaceAntiSpoof%20Databases.asp>`_. 
 
 Installation
 ------------
