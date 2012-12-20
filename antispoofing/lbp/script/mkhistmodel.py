@@ -9,7 +9,8 @@ import os, sys
 import argparse
 import bob
 import numpy
-import xbob.db.replay
+
+from antispoofing.utils.db import *
 
 def create_full_dataset(indir, objects):
   """Creates a full dataset matrix out of all the specified files"""
@@ -29,15 +30,18 @@ def main():
 
   INPUT_DIR = os.path.join(basedir, 'lbp_features')
   OUTPUT_DIR = os.path.join(basedir, 'res')
-
-  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
   
   parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the histogram features of all the videos')
   parser.add_argument('-d', '--output-dir', metavar='DIR', type=str, dest='outputdir', default=OUTPUT_DIR, help='Base directory that will be used to save the results (models).')
-  parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str, dest="protocol", default='grandtest', help='The protocol type may be specified instead of the the id switch to subselect a smaller number of files to operate on', choices=protocols)   
   
+  #######
+  # Database especific configuration
+  #######
+  Database.create_parser(parser, implements_any_of='video')
+
   args = parser.parse_args()
+
   if not os.path.exists(args.inputdir):
     parser.error("input directory does not exist")
   
@@ -46,12 +50,9 @@ def main():
     
   print "Output directory set to \"%s\"" % args.outputdir
   print "Loading input files..."
-
   # loading the input files
-  db = xbob.db.replay.Database()
-
-  #process_train_real = db.files(directory=args.inputdir, extension='.hdf5', protocol=args.protocol, groups='train', cls='real')
-  process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
+  database = args.cls(args)
+  process_train_real, process_train_attack = database.get_train_data()
 
   # create the full datasets from the file data
   train_real = create_full_dataset(args.inputdir, process_train_real);

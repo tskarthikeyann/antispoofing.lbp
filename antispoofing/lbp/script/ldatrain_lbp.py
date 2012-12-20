@@ -12,8 +12,8 @@ import os, sys
 import argparse
 import bob
 import numpy
-import xbob.db.replay
 
+from antispoofing.utils.db import *
 
 def create_full_dataset(indir, objects):
   """Creates a full dataset matrix out of all the specified files"""
@@ -59,8 +59,6 @@ def main():
   INPUT_DIR = os.path.join(basedir, 'lbp_features')
   OUTPUT_DIR = os.path.join(basedir, 'res')
 
-  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
-
   parser = argparse.ArgumentParser(description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the scores to be loaded')
@@ -68,13 +66,18 @@ def main():
   parser.add_argument('-n', '--normalize', action='store_true', dest='normalize', default=False, help='If True, will do zero mean unit variance normalization on the data before creating the LDA machine')
   parser.add_argument('-r', '--pca_reduction', action='store_true', dest='pca_reduction', default=False, help='If set, PCA dimensionality reduction will be performed to the data before doing LDA')
   parser.add_argument('-e', '--energy', type=str, dest="energy", default='0.99', help='The energy which needs to be preserved after the dimensionality reduction if PCA is performed prior to LDA')
-  parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str, dest="protocol", default='grandtest', help='The protocol type may be specified instead of the the id switch to subselect a smaller number of files to operate on', choices=protocols) 
   parser.add_argument('-s', '--score', dest='score', action='store_true', default=False, help='If set, the final classification scores of all the frames will be dumped in a file')
 
   from .. import ml
   from ..ml import pca, lda, norm
 
+  #######
+  # Database especific configuration
+  #######
+  Database.create_parser(parser, implements_any_of='video')
+
   args = parser.parse_args()
+
   if not os.path.exists(args.inputdir):
     parser.error("input directory does not exist")
 
@@ -84,16 +87,17 @@ def main():
   energy = float(args.energy)
 
   print "Loading input files..."
+  database = args.cls(args)
+  process_train_real, process_train_attack = database.get_train_data()
+  process_devel_real, process_devel_attack = database.get_devel_data()
+  process_test_real, process_test_attack = database.get_test_data()
 
-  # loading the input files
-  db = xbob.db.replay.Database()
-
-  process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
-  process_train_attack = db.objects(protocol=args.protocol, groups='train', cls='attack')
-  process_devel_real = db.objects(protocol=args.protocol, groups='devel', cls='real')
-  process_devel_attack = db.objects(protocol=args.protocol, groups='devel', cls='attack')
-  process_test_real = db.objects(protocol=args.protocol, groups='test', cls='real')
-  process_test_attack = db.objects(protocol=args.protocol, groups='test', cls='attack')
+  #process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
+  #process_train_attack = db.objects(protocol=args.protocol, groups='train', cls='attack')
+  #process_devel_real = db.objects(protocol=args.protocol, groups='devel', cls='real')
+  #process_devel_attack = db.objects(protocol=args.protocol, groups='devel', cls='attack')
+  #process_test_real = db.objects(protocol=args.protocol, groups='test', cls='real')
+  #process_test_attack = db.objects(protocol=args.protocol, groups='test', cls='attack')
 
   # create the full datasets from the file data
   train_real = create_full_dataset(args.inputdir, process_train_real); train_attack = create_full_dataset(args.inputdir, process_train_attack); 

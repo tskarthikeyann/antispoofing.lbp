@@ -10,7 +10,8 @@ import os, sys
 import argparse
 import bob
 import numpy
-import xbob.db.replay
+
+from antispoofing.utils.db import *
 
 def create_full_dataset(indir, objects):
   """Creates a full dataset matrix out of all the specified files"""
@@ -56,15 +57,12 @@ def main():
   INPUT_DIR = os.path.join(basedir, 'lbp_features')
   INPUT_MODEL_DIR = os.path.join(basedir, 'res')
   OUTPUT_DIR = os.path.join(basedir, 'res')
-  
-  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
 
   parser = argparse.ArgumentParser(description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the scores to be loaded')
   parser.add_argument('-m', '--input-modeldir', metavar='DIR', type=str, dest='inputmodeldir', default=INPUT_MODEL_DIR, help='Base directory containing the histogram models to be loaded')
   parser.add_argument('-d', '--output-dir', metavar='DIR', type=str, dest='outputdir', default=OUTPUT_DIR, help='Base directory that will be used to save the results.')
-  parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str, dest="protocol", default='grandtest', help='The protocol type may be specified instead of the the id switch to subselect a smaller number of files to operate on', choices=protocols) 
   parser.add_argument('-s', '--score', dest='score', action='store_true', default=False, help='If set, the final classification scores of all the frames will be dumped in a file')
 
   from .. import ml
@@ -72,7 +70,13 @@ def main():
   from ..ml import perf
   from ..spoof import chi2
 
+  #######
+  # Database especific configuration
+  #######
+  Database.create_parser(parser, implements_any_of='video')
+
   args = parser.parse_args()
+
   if not os.path.exists(args.inputdir) or not os.path.exists(args.inputmodeldir):
     parser.error("input directory does not exist")
 
@@ -82,15 +86,11 @@ def main():
   print "Output directory set to \"%s\"" % args.outputdir
   print "Loading input files..."
 
-  # loading the input files (all the feature vectors of all the files in different subdatasets)
-  db = xbob.db.replay.Database()
-
-  process_devel_real = db.objects(protocol=args.protocol, groups='devel', cls='real')
-  process_devel_attack = db.objects(protocol=args.protocol, groups='devel', cls='attack')
-  process_test_real = db.objects(protocol=args.protocol, groups='test', cls='real')
-  process_test_attack = db.objects(protocol=args.protocol, groups='test', cls='attack')
-  process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
-  process_train_attack = db.objects(protocol=args.protocol, groups='train', cls='attack')
+  # loading the input files
+  database = args.cls(args)
+  process_train_real, process_train_attack = database.get_train_data()
+  process_devel_real, process_devel_attack = database.get_devel_data()
+  process_test_real, process_test_attack = database.get_test_data()
 
   # create the full datasets from the file data
   devel_real = create_full_dataset(args.inputdir, process_devel_real); devel_attack = create_full_dataset(args.inputdir, process_devel_attack); 
@@ -128,6 +128,8 @@ def main():
     map_scores(vf_dir, score_dir, process_train_attack, sc_train_realmodel[1])
 
   perftable, eer_thres, mhter_thres = perf.performance_table(sc_test_realmodel, sc_devel_realmodel, "CHI-2 comparison, RESULTS")
+  print perftable 
+
   tf = open(os.path.join(args.outputdir, 'perf_table.txt'), 'w')
   tf.write(perftable)
   tf.close()  

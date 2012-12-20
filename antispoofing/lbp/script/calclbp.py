@@ -2,25 +2,25 @@
 #Ivana Chingovska <ivana.chingovska@idiap.ch>
 #Thu Jan 19 12:53:56 CET 2012
 
-"""Calculates the frame accumulated and then averaged LBP histogram of the normalized faces in the videos in the REPLAY-ATTACK database. The result is the average LBP histogram over all the frames of the video. Different types of LBP operators are supported. The histograms can be computed for a subset of the videos in the database (using the protocols in REPLAY-ATTACK). The output is a single .hdf5 file for each video. The procedure is described in the paper: "On the Effectiveness of Local Binary patterns in Face Anti-spoofing" - Chingovska, Anjos & Marcel; BIOSIG 2012
+"""Calculates the frame accumulated and then averaged LBP histogram of the normalized faces in the videos in the REPLAY-ATTACK (or CASIA-FASD) database. The result is the average LBP histogram over all the frames of the video. Different types of LBP operators are supported. The histograms can be computed for a subset of the videos in the database (using the protocols in the database). The output is a single .hdf5 file for each video. The procedure is described in the paper: "On the Effectiveness of Local Binary patterns in Face Anti-spoofing" - Chingovska, Anjos & Marcel; BIOSIG 2012
 """
 
 import os, sys
 import argparse
+import bob
+import numpy
+import math
+import string
+
+from antispoofing.utils.faceloc import *
+from antispoofing.utils.db import *
 
 def main():
-
-  import bob
-  import numpy
-  import math
-  import xbob.db.replay
   
   basedir = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
 
   INPUT_DIR = os.path.join(basedir, 'database')
   OUTPUT_DIR = os.path.join(basedir, 'lbp_features')
-
-  protocols = [k.name for k in xbob.db.replay.Database().protocols()]
 
   parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the videos to be treated by this procedure (defaults to "%(default)s")')
@@ -30,8 +30,13 @@ def main():
   parser.add_argument('-l', '--lbptype', metavar='LBPTYPE', type=str, choices=('regular', 'riu2', 'uniform'), default='uniform', dest='lbptype', help='Choose the type of LBP to use (defaults to "%(default)s")')
   parser.add_argument('--el', '--elbptype', metavar='ELBPTYPE', type=str, choices=('regular', 'transitional', 'direction_coded', 'modified'), default='regular', dest='elbptype', help='Choose the type of extended LBP features to compute (defaults to "%(default)s")')
   parser.add_argument('-b', '--blocks', metavar='BLOCKS', type=int, default=1, dest='blocks', help='The region over which the LBP is calculated will be divided into the given number of blocks squared. The histograms of the individial blocks will be concatenated.(defaults to "%(default)s")')
-  parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str, dest="protocol", default='grandtest', help='The REPLAY-ATTACK protocol type may be specified instead of the id switch to subselect a smaller number of files to operate on', choices=protocols)
   parser.add_argument('-o', dest='overlap', action='store_true', default=False, help='If set, the blocks on which the image is divided will be overlapping')
+
+  #######
+  # Database especific configuration
+  #######
+  #Database.create_parser(parser)
+  Database.create_parser(parser, implements_any_of='video')
 
   args = parser.parse_args()
 
@@ -40,12 +45,13 @@ def main():
   from .. import spoof
   from .. import faceloc
 
-  db = xbob.db.replay.Database()
-
-  if args.protocol:
-    process = db.objects(protocol=args.protocol)
-  else:
-    process = db.objects(protocol=args.protocol)
+  ########################
+  #Querying the database
+  ########################
+  #database = new_database(databaseName,args=args)
+  database = args.cls(args)
+  realObjects, attackObjects = database.get_all_data()
+  process = realObjects + attackObjects 
 
   counter = 0
   # process each video
@@ -54,12 +60,14 @@ def main():
     input = bob.io.VideoReader(obj.videofile(directory=args.inputdir))
 
     # loading the face locations
-   
-    locations = faceloc.read_face(obj.facefile(args.inputdir))
+    if string.find(database.short_description(), "CASIA") != -1:
+      locations = faceloc.read_face(obj.facefile())
+    else:
+      locations = faceloc.read_face(obj.facefile(args.inputdir))  
     locations = faceloc.expand_detections(locations, input.number_of_frames)
     sz = args.normfacesize # the size of the normalized face box
    
-    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (obj.path,
+    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (obj.make_path(),
       input.number_of_frames, counter, len(process)))
 
     # start the work here...
