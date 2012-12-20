@@ -43,6 +43,8 @@ installed **prior** to try using the programs described in this package. Visit
 `the REPLAY-ATTACK database portal
 <https://www.idiap.ch/dataset/replayattack>`_ for more information.
 
+This satellite package can also work with the CASIA_FASD database available at <http://www.cbsr.ia.ac.cn/english/FaceAntiSpoof%20Databases.asp>`_
+
 Installation
 ------------
 
@@ -122,19 +124,18 @@ User Guide
 ----------
 
 This section explains how to use the package in order to: a) calculate the LBP
-features on the REPLAY-ATTACK database; b) perform classification using Chi-2,
+features on the REPLAY-ATTACK or CASIA_FASD database; b) perform classification using Chi-2,
 Linear Discriminant Analysis (LDA) and Support Vector Machines (SVM).
 
 It is assumed you have followed the installation instructions for the package,
-and got the REPLAY-ATTACK database downloaded and uncompressed in a directory.
+and got the required database downloaded and uncompressed in a directory.
 After running the ``buildout`` command, you should have all required utilities
-sitting inside the ``bin`` directory. We expect that the video files downloaded
-for the PRINT-ATTACK database are installed in a sub-directory called
+sitting inside the ``bin`` directory. We expect that the video files of the database are installed in a sub-directory called
 ``database`` at the root of the package.  You can use a link to the location of
 the database files, if you don't want to have the database installed on the
 root of this package::
 
-  $ ln -s /path/where/you/installed/the/replay-attack-database database
+  $ ln -s /path/where/you/installed/the/database database
 
 If you don't want to create a link, use the ``--input-dir`` flag (available in
 all the scripts) to specify the root directory containing the database files.
@@ -166,7 +167,7 @@ all the videos in the REPLAY-ATTACK database and will put the resulting
 ``.hdf5`` files with the extracted feature vectors in the default output
 directory ``./lbp_features``::
 
-  $ ./bin/calclbp.py --ff 50
+  $ ./bin/calclbp.py --ff 50 replay
 
 In the above command, the face size filter is set to 50 pixels (as in the
 paper), and the program will discard all the frames with detected faces smaller
@@ -175,6 +176,10 @@ then 50 pixels as invalid.
 To see all the options for the scripts ``calclbp.py`` and ``calcframelbp.py``,
 just type ``--help`` at the command line. Change the default option in order to
 obtain various features, as described in the paper. 
+
+If you want to see all the options for a specific database (e.g. protocols, lighting conditions etc.), type the following command (for Replay-Attack)::
+ 
+  $ ./bin/calclbp.py replay --help
 
 Classification using Chi-2 distance
 ===================================
@@ -188,19 +193,19 @@ The script to use for creating the histogram model is
 ``./bin/mkhistmodel.py``.  It expects that the LBP features of the videos are
 stored in a folder ``./bin/lbp_features``. The model histogram will be written
 in the default output folder ``./res``. You can change this default features by
-setting the input arguments. To execute this script, just run::
+setting the input arguments. To execute this script fro Replay-Attack, just run::
 
-  $ ./bin/mkhistmodel.py
+  $ ./bin/mkhistmodel.py replay
 
 The script for performing Chi-2 histogram comparison is
 ``./bin/cmphistmodels.py``, and it assumes that the model histogram has been
 already created. It makes use of the utility script ``spoof/chi2.py`` and
 ``ml/perf.py`` for writing the results in a file. The default input directory is
 ``./lbp_features``, while the default input directoru for the histogram model
-as well as default output directory is ``./res``. To execute this script, just
+as well as default output directory is ``./res``. To execute this script for Replay-Attack, just
 run:: 
 
-  $ ./bin/cmphistmodel.py
+  $ ./bin/cmphistmodel.py replay
 
 To see all the options for the scripts ``mkhistmodel.py`` and
 ``cmphistmodels.py``, just type ``--help`` at the command line.
@@ -213,9 +218,9 @@ The classification with LDA is performed using the script
 ``ml/pca.py`` (if PCA reduction is performed on the data) and ``ml/norm.py``
 (if the data need to be normalized). The default input and output directories
 are ``./lbp_features`` and ``./res``. To execute the script with prior PCA
-dimensionality reduction as is done in the paper, call::
+dimensionality reduction as is done in the paper (for Replay-Attack), call::
 
-  $ ./bin/ldatrain_lbp.py -r 
+  $ ./bin/ldatrain_lbp.py -r replay
 
 To see all the options for this script, just type ``--help`` at the command
 line.
@@ -228,9 +233,9 @@ The classification with SVM is performed using the script
 reduction is performed on the data) and ``ml\norm.py`` (if the data need to be
 normalized). The default input and output directories are ``./lbp_features``
 and ``./res``. To execute the script with prior normalization of the data in
-the range ``[-1, 1]`` as in the paper, the default parameters, call::
+the range ``[-1, 1]`` as in the paper (for Replay-Attack), call::
 
-  $ ./bin/svmtrain_lbp.py -n
+  $ ./bin/svmtrain_lbp.py -n replay
 
 To see all the options for this script, just type ``--help`` at the command
 line.
