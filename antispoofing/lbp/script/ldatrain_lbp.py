@@ -24,8 +24,8 @@ def create_full_dataset(indir, objects):
     if dataset is None:
       dataset = fvs
     else:
-      dataset = numpy.append(dataset, fvs, axis = 0)
-  return dataset
+      dataset = numpy.append(dataset, fvs, axis = 0)   
+  return dataset[~numpy.isnan(dataset).any(axis=1)]  # remove all the Nan elements 
 
 def map_scores(indir, score_dir, objects, score_list):
   """Maps frame scores to frames of the objects. Writes the scores for each frame in a file, NaN for invalid frames
@@ -91,13 +91,6 @@ def main():
   process_train_real, process_train_attack = database.get_train_data()
   process_devel_real, process_devel_attack = database.get_devel_data()
   process_test_real, process_test_attack = database.get_test_data()
-
-  #process_train_real = db.objects(protocol=args.protocol, groups='train', cls='real')
-  #process_train_attack = db.objects(protocol=args.protocol, groups='train', cls='attack')
-  #process_devel_real = db.objects(protocol=args.protocol, groups='devel', cls='real')
-  #process_devel_attack = db.objects(protocol=args.protocol, groups='devel', cls='attack')
-  #process_test_real = db.objects(protocol=args.protocol, groups='test', cls='real')
-  #process_test_attack = db.objects(protocol=args.protocol, groups='test', cls='attack')
 
   # create the full datasets from the file data
   train_real = create_full_dataset(args.inputdir, process_train_real); train_attack = create_full_dataset(args.inputdir, process_train_attack); 
