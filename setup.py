@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 setup(
 
     name='antispoofing.lbp',
-    version='1.1.0',
+    version='1.1.1',
     description='Texture (LBP) based counter-measures for the REPLAY-ATTACK database',
     url='http://pypi.python.org/pypi/antispoofing.lbp',
     license='GPLv3',
