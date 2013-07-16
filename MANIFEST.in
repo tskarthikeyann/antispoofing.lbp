@@ -1,1 +1,2 @@
-include *.rst bootstrap.py *.cfg
+include *.rst bootstrap.py buildout.cfg
+exclude .installed.cfg
