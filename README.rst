@@ -10,7 +10,7 @@ presented at the IEEE BioSIG 2012 meeting.
 If you use this package and/or its results, please cite the following
 publications:
 
-1. The original paper with the counter-measure explained in details::
+1. The `original paper <http://publications.idiap.ch/downloads/papers/2012/Chingovska_IEEEBIOSIG2012_2012.pdf>`_ with the counter-measure explained in details::
 
     @INPROCEEDINGS{Chingovska_BIOSIG_2012,
     author = {Chingovska, Ivana and Anjos, Andr{\'{e}} and Marcel, S{\'{e}}bastien},
@@ -21,7 +21,7 @@ publications:
     year = {2012},
     }
  
-2. Bob as the core framework used to run the experiments::
+2. `Bob <http://www.idiap.ch/software/bob>`_ as the core framework used to run the experiments::
 
     @inproceedings{Anjos_ACMMM_2012,
         author = {A. Anjos AND L. El Shafey AND R. Wallace AND M. G\"unther AND C. McCool AND S. Marcel},
@@ -103,8 +103,7 @@ get you a fully operational test and development environment.
 
   The python shell used in the first line of the previous command set
   determines the python interpreter that will be used for all scripts developed
-  inside this package. Because this package makes use of `Bob
-  <http://idiap.github.com/bob>`_, you must make sure that the ``bootstrap.py``
+  inside this package. Because this package makes use of Bob, you must make sure that the ``bootstrap.py``
   script is called with the **same** interpreter used to build Bob, or
   unexpected problems might occur.
 
@@ -205,7 +204,7 @@ already created. It makes use of the utility script ``spoof/chi2.py`` and
 as well as default output directory is ``./res``. To execute this script for Replay-Attack, just
 run:: 
 
-  $ ./bin/cmphistmodel.py replay
+  $ ./bin/cmphistmodels.py replay
 
 To see all the options for the scripts ``mkhistmodel.py`` and
 ``cmphistmodels.py``, just type ``--help`` at the command line.
