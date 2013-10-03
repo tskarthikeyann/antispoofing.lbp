@@ -32,7 +32,7 @@ def map_scores(indir, score_dir, objects, score_list):
 
   Keyword parameters:
 
-  indir: the directory with the files with valid frames
+  indir: the directory with the feature vectors (needed to read which frames are invalid)
 
   score_dir: the directory where the score files are going to be written
 
@@ -43,13 +43,12 @@ def map_scores(indir, score_dir, objects, score_list):
   num_scores = 0 # counter for how many valid frames have been processed so far in total of all the objects
   for obj in objects:
     filename = os.path.expanduser(obj.make_path(indir, '.hdf5'))
-    vf = bob.io.load(filename)
-    vf_indices = list(numpy.where(vf == 1)[0]) # indices of the valid frames of the object
-    nvf_indices = list(numpy.where(vf == 0)[0]) # indices of the invalid frames of the object
-    scores = numpy.ndarray((len(vf), 1), dtype='float64') 
-    scores[vf_indices] = score_list[num_scores:num_scores + len(vf_indices)] # set the scores of the valid frames
-    scores[nvf_indices] = numpy.NaN # set NaN for the scores of the invalid frames
-    num_scores += len(vf_indices) # increase the nuber of valid scores that have been already maped
+    feat = bob.io.load(filename)
+    indices = ~numpy.isnan(feat).any(axis=1) #find the indices of invalid frames (they are set to False in the resulting array)
+    scores = numpy.ndarray((len(indices), 1), dtype='float64') 
+    scores[indices] = score_list[num_scores:num_scores + sum(indices)] # set the scores of the valid frames only
+    scores[~indices] = numpy.NaN # set NaN for the scores of the invalid frames
+    num_scores += sum(indices) # increase the number of valid scores that have been already maped
     obj.save(scores, score_dir, '.hdf5') # save the scores
 
 def main():
@@ -138,14 +137,13 @@ def main():
     train_real_out = train_real_out * -1; train_attack_out = train_attack_out * -1
     
   if args.score: # save the scores in a file
-    vf_dir = os.path.join(args.inputdir, 'validframes') # input directory with the files with valid frames
     score_dir = os.path.join(args.outputdir, 'scores') # output directory for the socre files
-    map_scores(vf_dir, score_dir, process_devel_real, numpy.reshape(devel_real_out, [len(devel_real_out), 1])) 
-    map_scores(vf_dir, score_dir, process_devel_attack, numpy.reshape(devel_attack_out, [len(devel_attack_out), 1]))
-    map_scores(vf_dir, score_dir, process_test_real, numpy.reshape(test_real_out, [len(test_real_out), 1]))
-    map_scores(vf_dir, score_dir, process_test_attack, numpy.reshape(test_attack_out, [len(test_attack_out), 1]))
-    map_scores(vf_dir, score_dir, process_train_real, numpy.reshape(train_real_out, [len(train_real_out), 1]))
-    map_scores(vf_dir, score_dir, process_train_attack, numpy.reshape(train_attack_out, [len(train_attack_out), 1]))
+    map_scores(args.inputdir, score_dir, process_devel_real, numpy.reshape(devel_real_out, [len(devel_real_out), 1])) 
+    map_scores(args.inputdir, score_dir, process_devel_attack, numpy.reshape(devel_attack_out, [len(devel_attack_out), 1]))
+    map_scores(args.inputdir, score_dir, process_test_real, numpy.reshape(test_real_out, [len(test_real_out), 1]))
+    map_scores(args.inputdir, score_dir, process_test_attack, numpy.reshape(test_attack_out, [len(test_attack_out), 1]))
+    map_scores(args.inputdir, score_dir, process_train_real, numpy.reshape(train_real_out, [len(train_real_out), 1]))
+    map_scores(args.inputdir, score_dir, process_train_attack, numpy.reshape(train_attack_out, [len(train_attack_out), 1]))
 
   # calculation of the error rates
   thres = bob.measure.eer_threshold(devel_attack_out, devel_real_out)

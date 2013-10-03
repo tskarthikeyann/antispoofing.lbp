@@ -30,6 +30,7 @@ def main():
   parser.add_argument('-l', '--lbptype', metavar='LBPTYPE', type=str, choices=('regular', 'riu2', 'uniform'), default='uniform', dest='lbptype', help='Choose the type of LBP to use (defaults to "%(default)s")')
   parser.add_argument('--el', '--elbptype', metavar='ELBPTYPE', type=str, choices=('regular', 'transitional', 'direction_coded', 'modified'), default='regular', dest='elbptype', help='Choose the type of extended LBP features to compute (defaults to "%(default)s")')
   parser.add_argument('-b', '--blocks', metavar='BLOCKS', type=int, default=1, dest='blocks', help='The region over which the LBP is calculated will be divided into the given number of blocks squared. The histograms of the individial blocks will be concatenated.(defaults to "%(default)s")')
+  parser.add_argument('-c', dest='circular', action='store_true', default=False, help='If set, circular LBP will be computed')
   parser.add_argument('-o', dest='overlap', action='store_true', default=False, help='If set, the blocks on which the image is divided will be overlapping')
 
   #######
@@ -73,7 +74,7 @@ def main():
     # start the work here...
     vin = input.load() # load the video
     
-    data = numpy.array(args.blocks * args.blocks * lbphistlength[args.lbptype] * [0]) # initialize the accumulated histogram	for uniform LBP
+    data = numpy.array(args.blocks * args.blocks * lbphistlength[args.lbptype] * [0.]) # initialize the accumulated histogram	for uniform LBP
 
     numvf = 0 # number of valid frames in the video (will be smaller then the total number of frames if a face is not detected or a very small face is detected in a frame when face lbp are calculated   
 
@@ -81,9 +82,10 @@ def main():
       frame = bob.ip.rgb_to_gray(vin[k,:,:,:])
       sys.stdout.write('.')
       sys.stdout.flush()
-      hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise
+      hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  circ=args.circular, overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise
       numvf = numvf + vf
-      data = data + hist # accumulate the histograms of all the frames one by one
+      if vf == 1: # if it is a valid frame, add this histogram into the accumulated histogram
+        data = data + hist # accumulate the histograms of all the frames one by one
           
     data = data / numvf # averaging over the number of valied frames
     
@@ -91,8 +93,7 @@ def main():
     sys.stdout.flush()
 
     # saves the output
-    arr = numpy.array(data, dtype='float64')
-    obj.save(arr.reshape([1,arr.size]), directory = args.directory, extension='.hdf5')
+    obj.save(data.reshape([1,data.size]), directory = args.directory, extension='.hdf5')
 
   return 0
 

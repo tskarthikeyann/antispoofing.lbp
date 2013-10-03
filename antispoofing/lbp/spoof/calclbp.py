@@ -200,5 +200,5 @@ def lbphist_facenorm(frame, lbptype, bbx, sz, elbptype='regular', radius=1, neig
     normbbx = numpy.cast['uint8'](tempbbx_)
     finalhist, vf = lbphist_frame(normbbx, lbptype, elbptype, radius, neighbors, circ, numbl, overlap)
     return finalhist, vf # the last argument is 1 if the frame was valid and 0 otherwise
-  return  numpy.array(numbl * numbl * lbphistlength[lbptype] * [0]), 0 # return empty histogram if there is no valid bounding box (example: detected face in the frame)
+  return  numpy.array(numbl * numbl * lbphistlength[lbptype] * [numpy.NaN]), 0 # return histogram with Nans if there is no valid bounding box (example: detected face in the frame) 
 

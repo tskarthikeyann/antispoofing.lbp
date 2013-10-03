@@ -31,6 +31,7 @@ def main():
   parser.add_argument('-l', '--lbptype', metavar='LBPTYPE', type=str, choices=('regular', 'riu2', 'uniform'), default='uniform', dest='lbptype', help='Choose the type of LBP to use (defaults to "%(default)s")')
   parser.add_argument('--el', '--elbptype', metavar='ELBPTYPE', type=str, choices=('regular', 'transitional', 'direction_coded', 'modified'), default='regular', dest='elbptype', help='Choose the type of extended LBP features to compute (defaults to "%(default)s")')
   parser.add_argument('-b', '--blocks', metavar='BLOCKS', type=int, default=1, dest='blocks', help='The region over which the LBP is calculated will be divided into the given number of blocks squared. The histograms of the individial blocks will be concatenated.(defaults to "%(default)s")')
+  parser.add_argument('-c', dest='circular', action='store_true', default=False, help='If set, circular LBP will be computed')
   parser.add_argument('-o', dest='overlap', action='store_true', default=False, help='If set, the blocks on which the image is divided will be overlapping')
 
   #######
@@ -68,7 +69,7 @@ def main():
     locations = faceloc.expand_detections(locations, input.number_of_frames)
     sz = args.normfacesize # the size of the normalized face box
    
-    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (obj.make_path,
+    sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (obj.make_path(),
       input.number_of_frames, counter, len(process)))
 
     # start the work here...
@@ -83,11 +84,11 @@ def main():
       frame = bob.ip.rgb_to_gray(vin[k,:,:,:])
       sys.stdout.write('.')
       sys.stdout.flush()
-      hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise
+      hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  circ=args.circular, overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise
       numvf = numvf + vf
       validframes.append(vf) # add 0 if it is not a valid frame, 1 in contrary
-      if vf == 1: # if it is a valid frame, add its histogram into the list of frame feature vectors
-        histdata = numpy.append(histdata, hist.reshape([1, hist.size]), axis = 0)
+      #if vf == 1: # if it is a valid frame, add its histogram into the list of frame feature vectors
+      histdata = numpy.append(histdata, hist.reshape([1, hist.size]), axis = 0) # add the histogram into the list of frame feature vectors
       
     sys.stdout.write('\n')
     sys.stdout.flush()
