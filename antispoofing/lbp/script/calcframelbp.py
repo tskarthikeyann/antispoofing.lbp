@@ -52,9 +52,8 @@ def main():
   #database = new_database(databaseName,args=args)
   database = args.cls(args)
   realObjects, attackObjects = database.get_all_data()
-  process = realObjects + attackObjects 
+  process = realObjects + attackObjects
 
-  import ipdb; ipdb.set_trace()
   counter = 0
   # process each video
   for obj in process:
@@ -68,19 +67,19 @@ def main():
       locations = faceloc.read_face(obj.facefile(args.inputdir))
     locations = faceloc.expand_detections(locations, input.number_of_frames)
     sz = args.normfacesize # the size of the normalized face box
-   
+
     sys.stdout.write("Processing file %s (%d frames) [%d/%d] " % (obj.make_path(),
       input.number_of_frames, counter, len(process)))
 
     # start the work here...
     vin = input.load() # load the video
-    
+
     histdata = numpy.ndarray((0,args.blocks * args.blocks * lbphistlength[args.lbptype]), 'float64') # the numpy.ndarray, each row is the histogram of one frame
 
-    numvf = 0 # number of valid frames in the video (will be smaller then the total number of frames if a face is not detected or a very small face is detected in a frame when face lbp are calculated  
+    numvf = 0 # number of valid frames in the video (will be smaller then the total number of frames if a face is not detected or a very small face is detected in a frame when face lbp are calculated
     validframes = [] # list with the indices of the valid frames
 
-    for k in range(0, vin.shape[0]): 
+    for k in range(0, vin.shape[0]):
       frame = bob.ip.rgb_to_gray(vin[k,:,:,:])
       sys.stdout.write('.')
       sys.stdout.flush()
@@ -89,7 +88,7 @@ def main():
       validframes.append(vf) # add 0 if it is not a valid frame, 1 in contrary
       #if vf == 1: # if it is a valid frame, add its histogram into the list of frame feature vectors
       histdata = numpy.append(histdata, hist.reshape([1, hist.size]), axis = 0) # add the histogram into the list of frame feature vectors
-      
+
     sys.stdout.write('\n')
     sys.stdout.flush()
 
