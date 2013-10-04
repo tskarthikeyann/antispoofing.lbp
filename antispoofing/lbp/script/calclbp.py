@@ -12,7 +12,7 @@ import numpy
 import math
 import string
 
-from antispoofing.utils.faceloc import *
+import antispoofing.utils.faceloc as faceloc
 from antispoofing.utils.db import *
 
 def main():
@@ -44,7 +44,6 @@ def main():
   lbphistlength = {'regular':256, 'riu2':10, 'uniform':59} # hardcoding the number of bins for the LBP variants
 
   from .. import spoof
-  from .. import faceloc
 
   ########################
   #Querying the database
