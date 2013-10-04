@@ -124,7 +124,7 @@ User Guide
 
 This section explains how to use the package in order to: a) calculate the LBP
 features on the REPLAY-ATTACK or CASIA_FASD database; b) perform classification using Chi-2,
-Linear Discriminant Analysis (LDA) and Support Vector Machines (SVM).
+Linear Discriminant Analysis (LDA) and Support Vector Machines (SVM). At the bottom of the page, you can find instructions how to reproduce the exact paper results.
 
 It is assumed you have followed the installation instructions for the package,
 and got the required database downloaded and uncompressed in a directory.
@@ -171,6 +171,10 @@ directory ``./lbp_features``::
 In the above command, the face size filter is set to 50 pixels (as in the
 paper), and the program will discard all the frames with detected faces smaller
 then 50 pixels as invalid.
+
+To calculate the feature vectors for each frame separately (and save them into a single file for the full video), you have to run::
+
+$ ./bin/calcframelbp.py --ff 50 replay
 
 To see all the options for the scripts ``calclbp.py`` and ``calcframelbp.py``,
 just type ``--help`` at the command line. Change the default option in order to
@@ -238,6 +242,37 @@ the range ``[-1, 1]`` as in the paper (for Replay-Attack), call::
 
 To see all the options for this script, just type ``--help`` at the command
 line.
+
+Reproduce paper results
+=======================
+
+The exact commands to reproduce the results from the paper are given here. First, feature exatraction should be done as follows::
+
+  $ ./bin/calcframelbp.py -d features/regular replay 
+  $ ./bin/calcframelbp.py -d features/transitional replay
+  $ ./bin/calcframelbp.py -d features/direction_coded replay
+  $ ./bin/calcframelbp.py -d features/modified replay
+  $ ./bin/calcframelbp.py -d features/per-block -b 3 replay
+  
+The results in Table II are obtained with the following commands::
+
+  $ ./bin/mkhistmodel.py -v features/regular -d models/regular replay
+  $ ./bin/cmphistmodels.py -v features/regular -m models/regular -d scores/regular -s replay
+  
+By changing the ``-v`` parameter, you can change the type of features, resulting in the scores for the different columns of the table.
+
+The results in Table III are obtained by the same commands, using the corresponding value for the ``-v`` parameter for the per-block computed feature.
+
+The results in Table IV for LDA and SVM classification are obtained by the following two commands, respectively::
+
+  $ ./bin/ldatrain_lbp.py -v features/regular -d scores/regular -n replay
+  $ ./bin/svmtrain_lbp.py -v features/regular -d scores/regular -n -r replay  
+     
+The results for the CASIA-FASD database can be obtained in the same way, by specifying the ``casia`` parameter at the end of the commands. Note that the results for CASIA-FASD are reported on per-block basis, and using 5-fold cross validation. This means that the results need to be generated 5 times, training with different fold, which can be specified as an argument as well.
+
+Important note: the results in the last column of Table V are not straight-forwardly reproducible at the moment (in particular, the concatenation of histograms is not directly supported using the scripts in this satellite package). Furthermore, at the present state, the scripts do not support the NUAA database. Work to solve this incovenience is in progress :)
+  
+
 
 Problems
 --------
