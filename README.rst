@@ -111,13 +111,11 @@ get you a fully operational test and development environment.
   consider it uses the default python interpreter. In this case, the above 3
   command lines should work as expected. If you have Bob installed somewhere
   else on a private directory, edit the file ``buildout.cfg`` **before**
-  running ``./bin/buildout``. Find the section named ``external`` and edit the
-  line ``egg-directories`` to point to the ``lib`` directory of the Bob
-  installation you want to use. For example::
+  running ``./bin/buildout``. Find the section named ``buildout`` and edit the line prefixes to point to the directory where Bob is installed or built. For example: For example::
 
-    [external]
-    recipe = xbob.buildout:external
-    egg-directories=/Users/crazyfox/work/bob/build/lib
+    [buildout]
+    ...
+    prefixes=/Users/crazyfox/work/bob/build
 
 User Guide
 ----------
