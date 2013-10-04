@@ -14,6 +14,7 @@ import bob
 import numpy
 
 from antispoofing.utils.db import *
+from antispoofing.utils.ml import *
 
 def create_full_dataset(indir, objects):
   """Creates a full dataset matrix out of all the specified files"""
@@ -67,8 +68,8 @@ def main():
   parser.add_argument('-e', '--energy', type=str, dest="energy", default='0.99', help='The energy which needs to be preserved after the dimensionality reduction if PCA is performed prior to LDA')
   parser.add_argument('-s', '--score', dest='score', action='store_true', default=False, help='If set, the final classification scores of all the frames will be dumped in a file')
 
-  from .. import ml
-  from ..ml import pca, lda, norm
+  #from .. import ml
+  #from ..ml import pca, lda, norm
 
   #######
   # Database especific configuration
@@ -139,9 +140,9 @@ def main():
     map_scores(args.inputdir, score_dir, process_train_attack, numpy.reshape(train_attack_out, [len(train_attack_out), 1]))
     
   # calculation of the error rates
-  thres = bob.measure.eer_threshold(devel_attack_out, devel_real_out)
-  dev_far, dev_frr = bob.measure.farfrr(devel_attack_out, devel_real_out, thres)
-  test_far, test_frr = bob.measure.farfrr(test_attack_out, test_real_out, thres)
+  thres = bob.measure.eer_threshold(devel_attack_out.flatten(), devel_real_out.flatten())
+  dev_far, dev_frr = bob.measure.farfrr(devel_attack_out.flatten(), devel_real_out.flatten(), thres)
+  test_far, test_frr = bob.measure.farfrr(test_attack_out.flatten(), test_real_out.flatten(), thres)
   
   # writing results to a file
   tbl = []
