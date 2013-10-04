@@ -22,21 +22,21 @@ def make_pca(data, perc):
     if set to True, unit-variance normalization will be done to the data prior to reduction (zero mean is done by default anyway)
 """
 
-  T = bob.trainer.SVDPCATrainer() # zero-mean, unit-variance will be performed prior to reduction
+  T = bob.trainer.PCATrainer() # zero-mean, unit-variance will be performed prior to reduction
   params = T.train(data) # params contain a tuple (eigenvecetors, eigenvalues) sorted in descending order
 
   eigvalues = params[1]
-  
+
   # calculating the cumulative energy of the eigenvalues
   cumEnergy = [sum(eigvalues[0:eigvalues.size-i]) / sum(eigvalues) for i in range(0, eigvalues.size+1)]
-  
+
   # calculating the number of eigenvalues to keep the required energy
   numeigvalues = eigvalues.size
   for i in range(0, len(cumEnergy)-1):
     if cumEnergy[i] < perc:
       numeigvalues = len(cumEnergy) - i
       break
-    
+
   # recalculating the shape of the LinearMachine
   oldshape = params[0].shape
   params[0].resize(oldshape[0], numeigvalues) # the second parameter gives the number of kept eigenvectors/eigenvalues
