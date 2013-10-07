@@ -12,18 +12,6 @@ import numpy
 
 from antispoofing.utils.db import *
 
-def create_full_dataset(indir, objects):
-  """Creates a full dataset matrix out of all the specified files"""
-  dataset = None
-  for obj in objects:
-    filename = os.path.expanduser(obj.make_path(indir, '.hdf5'))
-    fvs = bob.io.load(filename)
-    if dataset is None:
-      dataset = fvs
-    else:
-      dataset = numpy.append(dataset, fvs, axis = 0)
-  return dataset
-
 def main():
 
   basedir = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -34,6 +22,8 @@ def main():
   parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the histogram features of all the videos')
   parser.add_argument('-d', '--output-dir', metavar='DIR', type=str, dest='outputdir', default=OUTPUT_DIR, help='Base directory that will be used to save the results (models).')
+  
+  from ..helpers import score_manipulate as sm
   
   #######
   # Database especific configuration
@@ -55,7 +45,7 @@ def main():
   process_train_real, process_train_attack = database.get_train_data()
 
   # create the full datasets from the file data
-  train_real = create_full_dataset(args.inputdir, process_train_real);
+  train_real = sm.create_full_dataset(args.inputdir, process_train_real);
   
   print "Creating the model..."
 
