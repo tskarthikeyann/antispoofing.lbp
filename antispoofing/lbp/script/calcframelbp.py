@@ -33,6 +33,7 @@ def main():
   parser.add_argument('-b', '--blocks', metavar='BLOCKS', type=int, default=1, dest='blocks', help='The region over which the LBP is calculated will be divided into the given number of blocks squared. The histograms of the individial blocks will be concatenated.(defaults to "%(default)s")')
   parser.add_argument('-c', dest='circular', action='store_true', default=False, help='If set, circular LBP will be computed')
   parser.add_argument('-o', dest='overlap', action='store_true', default=False, help='If set, the blocks on which the image is divided will be overlapping')
+  parser.add_argument('-e', '--enrollment', action='store_true', default=False, dest='enrollment', help='If True, will do the processing on the enrollment data of the database (defaults to "%(default)s")')
 
   #######
   # Database especific configuration
@@ -51,8 +52,12 @@ def main():
   ########################
   #database = new_database(databaseName,args=args)
   database = args.cls(args)
-  realObjects, attackObjects = database.get_all_data()
-  process = realObjects + attackObjects
+  
+  if args.enrollment:  
+    process = database.get_enroll_data()
+  else:  
+    realObjects, attackObjects = database.get_all_data()
+    process = realObjects + attackObjects
 
   counter = 0
   # process each video

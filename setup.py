@@ -43,9 +43,9 @@ setup(
     install_requires=[
       "setuptools",
       "bob >= 1.2", #1.1.0
-      "xbob.db.replay", # Replay-Attack database
-      "xbob.db.casia_fasd", #CASIA database
-      "antispoofing.utils",  #Utils Package
+      "xbob.db.replay >= 1.0.4", # Replay-Attack database
+      "xbob.db.casia_fasd >= 1.1.0", #CASIA database
+      "antispoofing.utils >= 1.1.3",  #Utils Package
     ],
 
     entry_points={
