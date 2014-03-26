@@ -101,7 +101,7 @@ def main():
     sm.map_scores(args.inputdir, score_dir, process_test_attack, numpy.reshape(test_attack_out, [len(test_attack_out), 1]))
     sm.map_scores(args.inputdir, score_dir, process_train_real, numpy.reshape(train_real_out, [len(train_real_out), 1]))
     sm.map_scores(args.inputdir, score_dir, process_train_attack, numpy.reshape(train_attack_out, [len(train_attack_out), 1]))
-    
+   
   # calculation of the error rates
   thres = bob.measure.eer_threshold(devel_attack_out.flatten(), devel_real_out.flatten())
   dev_far, dev_frr = bob.measure.farfrr(devel_attack_out.flatten(), devel_real_out.flatten(), thres)
