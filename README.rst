@@ -200,13 +200,14 @@ setting the input arguments. To execute this script fro Replay-Attack, just run:
 
 The script for performing Chi-2 histogram comparison is
 ``./bin/cmphistmodels.py``, and it assumes that the model histogram has been
-already created. It makes use of the utility script ``spoof/chi2.py`` and
-``ml/perf.py`` for writing the results in a file. The default input directory is
+already created. It makes use of the utility script ``spoof/chi2.py``. The default input directory is
 ``./lbp_features``, while the default input directoru for the histogram model
 as well as default output directory is ``./res``. To execute this script for Replay-Attack, just
 run:: 
 
-  $ ./bin/cmphistmodels.py replay
+  $ ./bin/cmphistmodels.py -s replay
+
+Do not forget the ``-s`` option if you want the scores for each video saved in a file.
 
 To see all the options for the scripts ``mkhistmodel.py`` and
 ``cmphistmodels.py``, just type ``--help`` at the command line.
@@ -215,13 +216,13 @@ Classification with linear discriminant analysis (LDA)
 ======================================================
 
 The classification with LDA is performed using the script
-``./bin/ldatrain_lbp.py``. It makes use of the scripts ``ml/lda.py``,
-``ml/pca.py`` (if PCA reduction is performed on the data) and ``ml/norm.py``
-(if the data need to be normalized). The default input and output directories
+``./bin/ldatrain_lbp.py``. The default input and output directories
 are ``./lbp_features`` and ``./res``. To execute the script with prior PCA
 dimensionality reduction as is done in the paper (for Replay-Attack), call::
 
-  $ ./bin/ldatrain_lbp.py -r replay
+  $ ./bin/ldatrain_lbp.py -r -s replay
+
+Do not forget the ``-s`` option if you want the scores for each video saved in a file.
 
 To see all the options for this script, just type ``--help`` at the command
 line.
@@ -230,16 +231,31 @@ Classification with support vector machine (SVM)
 ================================================
 
 The classification with SVM is performed using the script
-``./bin/svmtrain_lbp.py``. It makes use of the scripts ``ml/pca.py`` (if PCA
-reduction is performed on the data) and ``ml\norm.py`` (if the data need to be
-normalized). The default input and output directories are ``./lbp_features``
+``./bin/svmtrain_lbp.py``. The default input and output directories are ``./lbp_features``
 and ``./res``. To execute the script with prior normalization of the data in
 the range ``[-1, 1]`` as in the paper (for Replay-Attack), call::
 
-  $ ./bin/svmtrain_lbp.py -n replay
+  $ ./bin/svmtrain_lbp.py -n --eval -s replay
+
+Do not forget the ``-s`` option if you want the scores for each video saved in a file.
 
 To see all the options for this script, just type ``--help`` at the command
 line.
+
+Classification with support vector machine (SVM) on a different database or database subset
+===========================================================================================
+
+In the training process, the SVM machine, as well as the normalization and PCA parameters are saved in an .hdf5 file. They can be used later for classification of data from a different database or database subset. This can be done using the script
+``./bin/svmtrain_lbp.py``. The default input and output directories are ``./lbp_features``
+and ``./res``. To execute the script, call::
+
+  $ ./bin/svmeval_lbp.py -n --eval replay
+
+Do not forget the ``-s`` option if you want the scores for each video saved in a file. Also, do not forget to specify the right .hdf5 file where the SVM machine and the parameters are saved using the ``-i`` parameter (the default one is ``./res/svm_machine.hdf5`` 
+
+To see all the options for this script, just type ``--help`` at the command
+line.
+
 
 Reproduce paper results
 =======================

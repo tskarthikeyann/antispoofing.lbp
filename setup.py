@@ -56,6 +56,7 @@ setup(
         'cmphistmodels.py = antispoofing.lbp.script.cmphistmodels:main',
         'ldatrain_lbp.py = antispoofing.lbp.script.ldatrain_lbp:main',
         'svmtrain_lbp.py = antispoofing.lbp.script.svmtrain_lbp:main',
+        'svmeval_lbp.py = antispoofing.lbp.script.svmeval_lbp:main',
         ],
       },
 
