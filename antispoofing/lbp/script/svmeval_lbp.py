@@ -123,8 +123,6 @@ def main():
   
   tbl = []
   tbl.append(" ")
-  if args.pca_reduction:
-    tbl.append("EER @devel - (energy kept after PCA = %.2f" % (energy))
   tbl.append(" threshold: %.4f" % thres)
   tbl.append(" dev:  FAR %.2f%% (%d / %d) | FRR %.2f%% (%d / %d) | HTER %.2f%% " % \
       (100*dev_far, int(round(dev_far*len(devel_attack))), len(devel_attack), 
