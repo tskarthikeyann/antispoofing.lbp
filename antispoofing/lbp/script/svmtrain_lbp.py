@@ -37,7 +37,8 @@ def main():
       formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-v', '--input-dir', metavar='DIR', type=str, dest='inputdir', default=INPUT_DIR, help='Base directory containing the scores to be loaded')
   parser.add_argument('-d', '--output-dir', metavar='DIR', type=str, dest='outputdir', default=OUTPUT_DIR, help='Base directory that will be used to save the results.')
-  parser.add_argument('-n', '--normalize', action='store_true', dest='normalize', default=False, help='If True, will do normalization on the data between [-1, 1] before training the SVM machine')
+  parser.add_argument('--mn', '--min-max-normalize', action='store_true', dest='min_max_normalize', default=False, help='If True, will do normalization on the data between [-1, 1] before training the SVM machine')
+  parser.add_argument('--sn', '--std-normalize', action='store_true', dest='std_normalize', default=False, help='If True, will do standard normalization on the data before training the SVM machine')
   parser.add_argument('-r', '--pca_reduction', action='store_true', dest='pca_reduction', default=False, help='If set, PCA dimensionality reduction will be performed to the data before training SVM')
   parser.add_argument('-e', '--energy', type=str, dest="energy", default='0.99', help='The energy which needs to be preserved after the dimensionality reduction if PCA is performed prior to SVM training')
   parser.add_argument('--eval', dest='eval', action='store_true', default=False, help='If set, evaluation will be performed using the trained SVM')
@@ -75,17 +76,26 @@ def main():
   devel_real = sm.create_full_dataset(args.inputdir, process_devel_real); devel_attack = sm.create_full_dataset(args.inputdir, process_devel_attack); 
   test_real = sm.create_full_dataset(args.inputdir, process_test_real); test_attack = sm.create_full_dataset(args.inputdir, process_test_attack); 
 
-  if args.normalize:  # normalization in the range [-1, 1] (recommended by LIBSVM)
+  if args.min_max_normalize:  # normalization in the range [-1, 1] (recommended by LIBSVM)
+    print "Running min max normalization in range[-1, 1]..."
     train_data = numpy.concatenate((train_real, train_attack), axis=0) 
     mins, maxs = norm.calc_min_max(train_data)
     train_real = norm.norm_range(train_real, mins, maxs, -1, 1); train_attack = norm.norm_range(train_attack, mins, maxs, -1, 1)
     devel_real = norm.norm_range(devel_real, mins, maxs, -1, 1); devel_attack = norm.norm_range(devel_attack, mins, maxs, -1, 1)
     test_real = norm.norm_range(test_real, mins, maxs, -1, 1); test_attack = norm.norm_range(test_attack, mins, maxs, -1, 1)
+    
+  if args.std_normalize: 
+    print "Running standard normalization..."
+    train_data = numpy.concatenate((train_real, train_attack), axis=0) 
+    mean, std = norm.calc_mean_std(train_data, nonStdZero = True)
+    train_real = norm.zeromean_unitvar_norm(train_real, mean, std); train_attack = norm.zeromean_unitvar_norm(train_attack, mean, std)
+    devel_real = norm.zeromean_unitvar_norm(devel_real, mean, std); devel_attack = norm.zeromean_unitvar_norm(devel_attack, mean, std)
+    test_real = norm.zeromean_unitvar_norm(test_real, mean, std); test_attack = norm.zeromean_unitvar_norm(test_attack, mean, std)
   
   if args.pca_reduction: # PCA dimensionality reduction of the data
     print "Running PCA reduction..."
     train=numpy.append(train_real, train_attack, axis=0)
-    pca_machine = pca.make_pca(train, energy) # performing PCA
+    pca_machine = pca.make_pca(train, energy, cov=True) # performing PCA
     train_real = pca.pcareduce(pca_machine, train_real); train_attack = pca.pcareduce(pca_machine, train_attack)
     devel_real = pca.pcareduce(pca_machine, devel_real); devel_attack = pca.pcareduce(pca_machine, devel_attack)
     test_real = pca.pcareduce(pca_machine, test_real); test_attack = pca.pcareduce(pca_machine, test_attack)
@@ -96,12 +106,19 @@ def main():
   svm_machine = svm_trainer.train([train_real, train_attack])
   
   sys.stdout.write("...saving parameters...\n")   
-  if args.normalize: 
-    fout.create_group('norm')
-    fout.cd('norm')
+  if args.min_max_normalize: 
+    fout.create_group('min-max-norm')
+    fout.cd('min-max-norm')
     fout.set_attribute('mins', mins)
     fout.set_attribute('maxs', maxs)
     fout.cd('..')
+  if args.std_normalize:   
+    fout.create_group('stdnorm')
+    fout.cd('stdnorm')
+    fout.set_attribute('mean', mean)
+    fout.set_attribute('std', std)
+    fout.cd('..')
+    
   if args.pca_reduction:  
     fout.create_group('pca_machine')
     fout.cd('pca_machine')

@@ -44,13 +44,14 @@ setup(
       "setuptools",
       "bob >= 1.2", #1.1.0
       "xbob.db.replay >= 1.0.4", # Replay-Attack database
-      "xbob.db.casia_fasd >= 1.1.0", #CASIA database
-      "antispoofing.utils >= 1.1.3",  #Utils Package
+      "xbob.db.casia_fasd >= 1.1.0", # CASIA database
+      "xbob.db.maskattack", # 3DMAD
+      "antispoofing.utils >= 1.1.3",  # Utils Package
     ],
 
     entry_points={
       'console_scripts': [
-        'calclbp.py = antispoofing.lbp.script.calclbp:main',
+        #'calclbp.py = antispoofing.lbp.script.calclbp:main',
         'calcframelbp.py = antispoofing.lbp.script.calcframelbp:main',
         'mkhistmodel.py = antispoofing.lbp.script.mkhistmodel:main',
         'cmphistmodels.py = antispoofing.lbp.script.cmphistmodels:main',

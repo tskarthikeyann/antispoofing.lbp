@@ -50,13 +50,23 @@ def main():
 
   print "Reading input file with SVM machine and parameters"
   fin = bob.io.HDF5File(os.path.join(args.infile), 'r')
-  if fin.has_group('norm'):
-    fin.cd('norm')
+  if fin.has_group('min-max-norm'):
+    fin.cd('min-max-norm')
     mins = fin.get_attribute('mins')
     maxs = fin.get_attribute('maxs')
     fin.cd('..')
   else:
     mins = None; maxs = None  
+    
+  if fin.has_group('stdnorm'):
+    fin.cd('stdnorm')
+    mean = fin.get_attribute('mean')
+    std = fin.get_attribute('std')
+    fin.cd('..')
+  else:
+    mean = None; std = None  
+  
+    
   if fin.has_group('pca_machine'):
     fin.cd('pca_machine')
     pca_machine = bob.machine.LinearMachine(fin)
@@ -83,6 +93,11 @@ def main():
     train_real = norm.norm_range(train_real, mins, maxs, -1, 1); train_attack = norm.norm_range(train_attack, mins, maxs, -1, 1)
     devel_real = norm.norm_range(devel_real, mins, maxs, -1, 1); devel_attack = norm.norm_range(devel_attack, mins, maxs, -1, 1)
     test_real = norm.norm_range(test_real, mins, maxs, -1, 1); test_attack = norm.norm_range(test_attack, mins, maxs, -1, 1)
+    
+  if mean != None and std != None:  # standard normalization
+    train_real = norm.zeromean_unitvar_norm(train_real, mean, std); train_attack = norm.zeromean_unitvar_norm(train_attack, mean, std)
+    devel_real = norm.zeromean_unitvar_norm(devel_real, mean, std); devel_attack = norm.zeromean_unitvar_norm(devel_attack, mean, std)
+    test_real = norm.zeromean_unitvar_norm(test_real, mean, std); test_attack = norm.zeromean_unitvar_norm(test_attack, mean, std)
   
   if pca_machine != None: # PCA dimensionality reduction of the data
     train_real = pca.pcareduce(pca_machine, train_real); train_attack = pca.pcareduce(pca_machine, train_attack)

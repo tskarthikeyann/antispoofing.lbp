@@ -5,15 +5,16 @@
 """Calculates the frame accumulated and then averaged LBP histogram of the normalized faces in the videos in the REPLAY-ATTACK (or CASIA-FASD) database. The result is the average LBP histogram over all the frames of the video. Different types of LBP operators are supported. The histograms can be computed for a subset of the videos in the database (using the protocols in the database). The output is a single .hdf5 file for each video. The procedure is described in the paper: "On the Effectiveness of Local Binary patterns in Face Anti-spoofing" - Chingovska, Anjos & Marcel; BIOSIG 2012
 """
 
-import os, sys
+import os
+import sys
 import argparse
 import bob
 import numpy
-import math
 import string
 
 import antispoofing.utils.faceloc as faceloc
 from antispoofing.utils.db import *
+
 
 def main():
   

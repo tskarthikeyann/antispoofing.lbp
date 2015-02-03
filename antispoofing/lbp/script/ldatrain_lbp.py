@@ -51,9 +51,11 @@ def main():
 
   print "Loading input files..."
   database = args.cls(args)
+  
   process_train_real, process_train_attack = database.get_train_data()
   process_devel_real, process_devel_attack = database.get_devel_data()
   process_test_real, process_test_attack = database.get_test_data()
+  
 
   # create the full datasets from the file data
   train_real = sm.create_full_dataset(args.inputdir, process_train_real); train_attack = sm.create_full_dataset(args.inputdir, process_train_attack); 
@@ -62,6 +64,7 @@ def main():
   
   if args.normalize:  # zero mean unit variance data normalziation
     print "Applying standard normalization..."
+    #import ipdb; ipdb.set_trace()
     mean, std = norm.calc_mean_std(train_real, train_attack)
     train_real = norm.zeromean_unitvar_norm(train_real, mean, std); train_attack = norm.zeromean_unitvar_norm(train_attack, mean, std)
     devel_real = norm.zeromean_unitvar_norm(devel_real, mean, std); devel_attack = norm.zeromean_unitvar_norm(devel_attack, mean, std)

@@ -249,7 +249,7 @@ In the training process, the SVM machine, as well as the normalization and PCA p
 ``./bin/svmtrain_lbp.py``. The default input and output directories are ``./lbp_features``
 and ``./res``. To execute the script, call::
 
-  $ ./bin/svmeval_lbp.py -n --eval replay
+  $ ./bin/svmeval_lbp.py replay
 
 Do not forget the ``-s`` option if you want the scores for each video saved in a file. Also, do not forget to specify the right .hdf5 file where the SVM machine and the parameters are saved using the ``-i`` parameter (the default one is ``./res/svm_machine.hdf5`` 
 
