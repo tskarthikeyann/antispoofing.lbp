@@ -8,7 +8,8 @@ The details about the procedure are described in the paper: "On the Effectivenes
 
 import os, sys
 import argparse
-import bob
+import bob.measure
+import bob.io.base
 import numpy
 
 from antispoofing.utils.db import *
@@ -44,7 +45,7 @@ def main():
     parser.error("input directory does not exist")
 
   if not os.path.exists(args.outputdir): # if the output directory doesn't exist, create it
-    bob.db.utils.makedirs_safe(args.outputdir)
+    bob.io.base.create_directories_safe(args.outputdir)
     
   print "Output directory set to \"%s\"" % args.outputdir
   print "Loading input files..."
@@ -62,7 +63,7 @@ def main():
 
   print "Loading the models..."
   # loading the histogram models
-  histmodelsfile = bob.io.HDF5File(os.path.join(args.inputmodeldir, 'histmodelsfile.hdf5'),'r')
+  histmodelsfile = bob.io.base.HDF5File(os.path.join(args.inputmodeldir, 'histmodelsfile.hdf5'),'r')
   model_hist_real = histmodelsfile.read('model_hist_real')
   del histmodelsfile
     

@@ -8,7 +8,9 @@
 import os
 import sys
 import argparse
-import bob
+import bob.io.base
+import bob.ip.color
+import bob.io.video
 import numpy
 import string
 
@@ -62,7 +64,7 @@ def main():
   # process each video
   for obj in process:
     counter += 1
-    input = bob.io.VideoReader(obj.videofile(directory=args.inputdir))
+    input = bob.io.video.reader(obj.videofile(directory=args.inputdir))
 
     # loading the face locations
     if string.find(database.short_description(), "CASIA") != -1:
@@ -83,7 +85,7 @@ def main():
     numvf = 0 # number of valid frames in the video (will be smaller then the total number of frames if a face is not detected or a very small face is detected in a frame when face lbp are calculated   
 
     for k in range(0, vin.shape[0]): 
-      frame = bob.ip.rgb_to_gray(vin[k,:,:,:])
+      frame = bob.ip.color.rgb_to_gray(vin[k,:,:,:])
       sys.stdout.write('.')
       sys.stdout.flush()
       hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  circ=args.circular, overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise

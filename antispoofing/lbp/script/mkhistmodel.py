@@ -7,7 +7,7 @@
 
 import os, sys
 import argparse
-import bob
+import bob.io.base
 import numpy
 
 from antispoofing.utils.db import *
@@ -36,7 +36,7 @@ def main():
     parser.error("input directory does not exist")
   
   if not os.path.exists(args.outputdir): # if the output directory doesn't exist, create it
-    bob.db.utils.makedirs_safe(args.outputdir)
+    bob.io.base.create_directories_safe(args.outputdir)
     
   print "Output directory set to \"%s\"" % args.outputdir
   print "Loading input files..."
@@ -54,7 +54,7 @@ def main():
   model_hist_real = [i / train_real.shape[0] for i in model_hist_real]  # average the model histogram for the real access videos
 
   print "Saving the model histograms..."
-  histmodelsfile = bob.io.HDF5File(os.path.join(args.outputdir, 'histmodelsfile.hdf5'),'w')
+  histmodelsfile = bob.io.base.HDF5File(os.path.join(args.outputdir, 'histmodelsfile.hdf5'),'w')
   histmodelsfile.append('model_hist_real', numpy.array(model_hist_real))
 
   del histmodelsfile

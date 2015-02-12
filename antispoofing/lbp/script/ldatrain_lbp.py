@@ -10,7 +10,8 @@ The details about the procedure are described in the paper: "On the Effectivenes
 
 import os, sys
 import argparse
-import bob
+import bob.io.base
+import bob.measure
 import numpy
 
 from antispoofing.utils.db import *
@@ -45,7 +46,7 @@ def main():
     parser.error("input directory does not exist")
 
   if not os.path.exists(args.outputdir): # if the output directory doesn't exist, create it
-    bob.db.utils.makedirs_safe(args.outputdir)
+    bob.io.base.create_directories_safe(args.outputdir)
 
   energy = float(args.energy)
 

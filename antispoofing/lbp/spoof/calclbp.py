@@ -7,7 +7,7 @@
 
 import numpy
 import math
-import bob
+import bob.ip.base
 
 def lbphist(img, lbptype, elbptype='regular', rad=1, neighbors=8, circ=False):
   """Calculates a normalized LBP histogram over an image, using the bob LBP operator
@@ -28,7 +28,7 @@ def lbphist(img, lbptype, elbptype='regular', rad=1, neighbors=8, circ=False):
     True if circular LBP is needed, False otherwise
   """
 
-  elbps = {'regular':bob.ip.ELBPType.REGULAR, 'transitional':bob.ip.ELBPType.TRANSITIONAL, 'direction_coded':bob.ip.ELBPType.DIRECTION_CODED, 'modified':bob.ip.ELBPType.REGULAR}
+  elbps = {'regular':'regular', 'transitional':'trainsitional', 'direction_coded':'direction-coded', 'modified':'regular'}
 
   if elbptype=='modified':
     mct = True
@@ -36,23 +36,23 @@ def lbphist(img, lbptype, elbptype='regular', rad=1, neighbors=8, circ=False):
 
   if lbptype == 'uniform':
     if neighbors==16:
-      lbp = bob.ip.LBP(neighbors=16, uniform=True, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
+      lbp = bob.ip.base.LBP(neighbors=16, uniform=True, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
     else: # we assume neighbors==8 in this case
-      lbp = bob.ip.LBP(neighbors=8, uniform=True, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
+      lbp = bob.ip.base.LBP(neighbors=8, uniform=True, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
   elif lbptype == 'riu2':
     if neighbors==16:
-      lbp = bob.ip.LBP(neighbors=16, uniform=True, rotation_invariant=True, radius=rad, circular=circ, to_average=mct, elbp_type=elbps[elbptype])
+      lbp = bob.ip.base.LBP(neighbors=16, uniform=True, rotation_invariant=True, radius=rad, circular=circ, to_average=mct, elbp_type=elbps[elbptype])
     else: # we assume neighbors==8 in this case
-      lbp = bob.ip.LBP(neighbors=8, uniform=True, rotation_invariant=True, radius=rad, circular=circ, to_average=mct, elbp_type=elbps[elbptype])
+      lbp = bob.ip.base.LBP(neighbors=8, uniform=True, rotation_invariant=True, radius=rad, circular=circ, to_average=mct, elbp_type=elbps[elbptype])
   else: # regular LBP
     if neighbors==16:
-      lbp = bob.ip.LBP(neighbors=16, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
+      lbp = bob.ip.base.LBP(neighbors=16, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
     else: # we assume neighbors==8 in this case
-      lbp = bob.ip.LBP(neighbors=16, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
+      lbp = bob.ip.base.LBP(neighbors=16, circular=circ, radius=rad, to_average=mct, elbp_type=elbps[elbptype])
 
-  lbpimage = numpy.ndarray(lbp.get_lbp_shape(img), 'uint16') # allocating the image with lbp codes
+  lbpimage = numpy.ndarray(lbp.lbp_shape(img), 'uint16') # allocating the image with lbp codes
   lbp(img, lbpimage) # calculating the lbp image
-  hist = bob.ip.histogram(lbpimage, 0, lbp.max_label-1, lbp.max_label)
+  hist = bob.ip.base.histogram(lbpimage, (0, lbp.max_label-1), lbp.max_label)
   hist = hist / sum(hist) # histogram normalization
   return hist, 1 # the last argument is 1 if the frame was valid and 0 otherwise
 
@@ -194,7 +194,7 @@ def lbphist_facenorm(frame, lbptype, bbx, sz, elbptype='regular', radius=1, neig
     cutframe = frame[bbx.y:(bbx.y+bbx.height),bbx.x:(bbx.x+bbx.width)] # cutting the box region
     tempbbx = numpy.ndarray((sz, sz), 'float64')
     normbbx = numpy.ndarray((sz, sz), 'uint8')
-    bob.ip.scale(cutframe, tempbbx) # normalization
+    bob.ip.base.scale(cutframe, tempbbx) # normalization
     tempbbx_ = tempbbx + 0.5
     tempbbx_ = numpy.floor(tempbbx_)
     normbbx = numpy.cast['uint8'](tempbbx_)

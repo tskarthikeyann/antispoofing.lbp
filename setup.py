@@ -17,12 +17,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 from setuptools import setup, find_packages
 
+# Define package version
+version = open("version.txt").read().rstrip()
+
 # The only thing we do in this file is to call the setup() function with all
 # parameters that define our package.
 setup(
 
     name='antispoofing.lbp',
-    version='1.3.1',
+    version=version,
     description='Texture (LBP) based counter-measures for the REPLAY-ATTACK database',
     url='http://pypi.python.org/pypi/antispoofing.lbp',
     license='GPLv3',
@@ -42,11 +45,11 @@ setup(
 
     install_requires=[
       "setuptools",
-      "bob > 1.1.0", #1.1.0
-      "xbob.db.replay == 1.0.4", # Replay-Attack database
-      "xbob.db.casia_fasd == 1.1.0", # CASIA database
-      "xbob.db.maskattack", # 3DMAD
-      "antispoofing.utils == 1.1.3",  # Utils Package
+      "bob.db.base", #1.1.0
+      "bob.db.replay", # Replay-Attack database
+      "bob.db.casia_fasd", # CASIA database
+      #"xbob.db.maskattack", # 3DMAD
+      "antispoofing.utils",  # Utils Package
     ],
 
     entry_points={

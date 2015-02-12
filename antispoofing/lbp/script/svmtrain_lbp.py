@@ -14,7 +14,9 @@ The details about the procedure are described in the paper: "On the Effectivenes
 
 import os, sys
 import argparse
-import bob
+import bob.io.base
+import bob.learn.libsvm
+import bob.measure
 import numpy
 
 from antispoofing.utils.db import *
@@ -57,12 +59,12 @@ def main():
     parser.error("input directory does not exist")
 
   if not os.path.exists(args.outputdir): # if the output directory doesn't exist, create it
-    bob.db.utils.makedirs_safe(args.outputdir)
+    bob.io.base.create_directories_safe(args.outputdir)
 
   energy = float(args.energy)
 
   # Setting the output file
-  fout = bob.io.HDF5File(os.path.join(args.outputdir, 'svm_machine.hdf5'), 'w')
+  fout = bob.io.base.HDF5File(os.path.join(args.outputdir, 'svm_machine.hdf5'), 'w')
 
   print "Loading input files..."
   # loading the input files
@@ -101,7 +103,7 @@ def main():
     test_real = pca.pcareduce(pca_machine, test_real); test_attack = pca.pcareduce(pca_machine, test_attack)
 
   print "Training SVM machine..."
-  svm_trainer = bob.trainer.SVMTrainer()
+  svm_trainer = bob.learn.libsvm.Trainer()
   svm_trainer.probability = True
   svm_machine = svm_trainer.train([train_real, train_attack])
   
@@ -124,6 +126,7 @@ def main():
     fout.cd('pca_machine')
     pca_machine.save(fout)
     fout.cd('..')
+
   fout.create_group('svm_machine')
   fout.cd('svm_machine')
   svm_machine.save(fout)

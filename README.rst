@@ -21,7 +21,7 @@ publications:
     year = {2012},
     }
  
-2. `Bob <http://www.idiap.ch/software/bob>`_ as the core framework used to run the experiments::
+2. Bob_ as the core framework used to run the experiments::
 
     @inproceedings{Anjos_ACMMM_2012,
         author = {A. Anjos AND L. El Shafey AND R. Wallace AND M. G\"unther AND C. McCool AND S. Marcel},
@@ -56,66 +56,18 @@ Installation
 
   Go to `http://pypi.python.org/pypi/antispoofing.lbp
   <http://pypi.python.org/pypi/antispoofing.lbp>`_ to download the latest
-  stable version of this package.
+  stable version of this package. Then, extract the .zip file to a folder of your choice.
 
-There are 2 options you can follow to get this package installed and
-operational on your computer: you can use automatic installers like `pip
-<http://pypi.python.org/pypi/pip/>`_ (or `easy_install
-<http://pypi.python.org/pypi/setuptools>`_) or manually download, unpack and
-use `zc.buildout <http://pypi.python.org/pypi/zc.buildout>`_ to create a
-virtual work environment just for this package.
+The ``antispoofing.lbp`` package is a satellite package of the free signal processing and machine learning library Bob_. This dependency has to be downloaded manually. This version of the package depends on Bob_ version 2 or greater. To install `packages of Bob <https://github.com/idiap/bob/wiki/Packages>`_, please read the `Installation Instructions <https://github.com/idiap/bob/wiki/Installation>`_. For Bob_ to be able to work properly, some dependent Bob packages are required to be installed. Please make sure that you have read the Dependencies for your operating system.
 
-Using an automatic installer
-============================
+The most simple solution is to download and extract ``antispoofing.lbp`` package, then to go to the console and write::
 
-Using ``pip`` is the easiest (shell commands are marked with a ``$`` signal)::
+  $ cd antispoofing.lbp
+  $ python bootstrap-buildout.py
+  $ bin/buildout
 
-  $ pip install antispoofing.lbp
+This will download all required dependent Bob_ and other packages and install them locally. 
 
-You can also do the same with ``easy_install``::
-
-  $ easy_install antispoofing.lbp
-
-This will download and install this package plus any other required
-dependencies. It will also verify if the version of Bob you have installed
-is compatible.
-
-This scheme works well with virtual environments by `virtualenv
-<http://pypi.python.org/pypi/virtualenv>`_ or if you have root access to your
-machine. Otherwise, we recommend you use the next option.
-
-Using ``zc.buildout``
-=====================
-
-Download the latest version of this package from `PyPI
-<http://pypi.python.org/pypi/antispoofing.lbp>`_ and unpack it in your
-working area. The installation of the toolkit itself uses `buildout
-<http://www.buildout.org/>`_. You don't need to understand its inner workings
-to use this package. Here is a recipe to get you started::
-  
-  $ python bootstrap.py 
-  $ ./bin/buildout
-
-These 2 commands should download and install all non-installed dependencies and
-get you a fully operational test and development environment.
-
-.. note::
-
-  The python shell used in the first line of the previous command set
-  determines the python interpreter that will be used for all scripts developed
-  inside this package. Because this package makes use of Bob, you must make sure that the ``bootstrap.py``
-  script is called with the **same** interpreter used to build Bob, or
-  unexpected problems might occur.
-
-  If Bob is installed by the administrator of your system, it is safe to
-  consider it uses the default python interpreter. In this case, the above 3
-  command lines should work as expected. If you have Bob installed somewhere
-  else on a private directory, edit the file ``buildout.cfg`` **before**
-  running ``./bin/buildout``. Find the section named ``buildout`` and edit the line prefixes to point to the directory where Bob is installed or built. For example: For example::
-
-    [buildout]
-    ...
-    prefixes=/Users/crazyfox/work/bob/build
 
 User Guide
 ----------
@@ -292,3 +244,6 @@ Problems
 --------
 
 In case of problems, please contact any of the authors of the paper.
+
+
+.. _Bob: http://www.idiap.ch/software/bob

@@ -12,7 +12,10 @@ The details about the procedure are described in the paper: "On the Effectivenes
 
 import os, sys
 import argparse
-import bob
+import bob.io.base
+import bob.learn.linear
+import bob.learn.libsvm
+import bob.measure
 import numpy
 
 from antispoofing.utils.db import *
@@ -46,10 +49,10 @@ def main():
     parser.error("input directory does not exist")
 
   if not os.path.exists(args.outputdir): # if the output directory doesn't exist, create it
-    bob.db.utils.makedirs_safe(args.outputdir)
+    bob.io.base.create_directories_safe(args.outputdir)
 
   print "Reading input file with SVM machine and parameters"
-  fin = bob.io.HDF5File(os.path.join(args.infile), 'r')
+  fin = bob.io.base.HDF5File(os.path.join(args.infile), 'r')
   if fin.has_group('min-max-norm'):
     fin.cd('min-max-norm')
     mins = fin.get_attribute('mins')
@@ -69,12 +72,12 @@ def main():
     
   if fin.has_group('pca_machine'):
     fin.cd('pca_machine')
-    pca_machine = bob.machine.LinearMachine(fin)
+    pca_machine = bob.learn.linear.Machine(fin)
     fin.cd('..')
   else:
     pca_machine = None  
   fin.cd('svm_machine')      
-  svm_machine = bob.machine.SupportVector(fin)
+  svm_machine = bob.learn.libsvm.Machine(fin)
   fin.cd('/')
 
   print "Loading input files..."

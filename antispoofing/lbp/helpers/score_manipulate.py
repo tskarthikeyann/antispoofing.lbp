@@ -5,7 +5,7 @@
 import pkg_resources
 
 import os, sys
-import bob
+import bob.io.base
 import numpy
 
 """
@@ -17,7 +17,7 @@ def create_full_dataset(indir, objects):
   dataset = None
   for obj in objects:
     filename = os.path.expanduser(obj.make_path(indir, '.hdf5'))
-    fvs = bob.io.load(filename)
+    fvs = bob.io.base.load(filename)
     if dataset is None:
       dataset = fvs
     else:
@@ -40,7 +40,7 @@ def map_scores(indir, score_dir, objects, score_list):
   num_scores = 0 # counter for how many valid frames have been processed so far in total of all the objects
   for obj in objects:
     filename = os.path.expanduser(obj.make_path(indir, '.hdf5'))
-    feat = bob.io.load(filename)
+    feat = bob.io.base.load(filename)
     indices = ~numpy.isnan(feat).any(axis=1) #find the indices of invalid frames (they are set to False in the resulting array)
     scores = numpy.ndarray((len(indices), 1), dtype='float64') 
     scores[indices] = score_list[num_scores:num_scores + sum(indices)] # set the scores of the valid frames only
