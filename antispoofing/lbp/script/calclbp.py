@@ -2,7 +2,7 @@
 #Ivana Chingovska <ivana.chingovska@idiap.ch>
 #Thu Jan 19 12:53:56 CET 2012
 
-"""Calculates the frame accumulated and then averaged LBP histogram of the normalized faces in the videos in the REPLAY-ATTACK (or CASIA-FASD) database. The result is the average LBP histogram over all the frames of the video. Different types of LBP operators are supported. The histograms can be computed for a subset of the videos in the database (using the protocols in the database). The output is a single .hdf5 file for each video. The procedure is described in the paper: "On the Effectiveness of Local Binary patterns in Face Anti-spoofing" - Chingovska, Anjos & Marcel; BIOSIG 2012
+"""Calculates the frame accumulated and then averaged LBP histogram of the normalized faces in the videos in REPLAY-ATTACK, CASIA_FASD and MSU-MFSD database. The result is the average LBP histogram over all the frames of the video. Different types of LBP operators are supported. The histograms can be computed for a subset of the videos in the database (using the protocols in the database). The output is a single .hdf5 file for each video. The procedure is described in the paper: "On the Effectiveness of Local Binary patterns in Face Anti-spoofing" - Chingovska, Anjos & Marcel; BIOSIG 2012
 """
 
 import os
@@ -36,6 +36,9 @@ def main():
   parser.add_argument('-c', dest='circular', action='store_true', default=False, help='If set, circular LBP will be computed')
   parser.add_argument('-o', dest='overlap', action='store_true', default=False, help='If set, the blocks on which the image is divided will be overlapping')
   parser.add_argument('-e', '--enrollment', action='store_true', default=False, dest='enrollment', help='If True, will do the processing of the enrollment data of the database (defaults to "%(default)s")')
+  parser.add_argument('--nn', '--nonorm', dest='nonorm', action='store_true', default=False, help='If True, normalization on the bounding box will NOT be perfomed. If False, normalization will be done depending on the -n parameter.')
+  parser.add_argument('--bbx', '--boundingbox', action='store_true', default=False, dest='boundingbox', help='If True, will read the face locations using the bbx function of the File class of the database. If False, will use faceloc.read_face utility to read the faceloc. For MSU-MFSD only (defaults to "%(default)s")')
+
   
   #######
   # Database especific configuration
@@ -69,8 +72,14 @@ def main():
     # loading the face locations
     if string.find(database.short_description(), "CASIA") != -1:
       locations = faceloc.read_face(obj.facefile())
-    else:
-      locations = faceloc.read_face(obj.facefile(args.inputdir))  
+    elif string.find(database.short_description(), "MSU") != -1:
+      if args.boundingbox: # load the locations based on the bbx function of the File object
+        locations = obj.bbx(directory=args.inputdir)
+        locations = {x[0]:faceloc.BoundingBox(x[1], x[2], x[3], x[4]) for x in locations} # for MSU MFSD
+      else:  
+        locations = faceloc.read_face(obj.facefile(args.inputdir)) # for MSU MFSD
+    else:  
+      locations = faceloc.read_face(obj.facefile(args.inputdir)) # for Replay-Attack
     locations = faceloc.expand_detections(locations, input.number_of_frames)
     sz = args.normfacesize # the size of the normalized face box
    
@@ -88,7 +97,10 @@ def main():
       frame = bob.ip.color.rgb_to_gray(vin[k,:,:,:])
       sys.stdout.write('.')
       sys.stdout.flush()
-      hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  circ=args.circular, overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise
+      if args.nonorm:
+        hist, vf = spoof.lbphist_face(frame, args.lbptype, locations[k], args.elbptype, numbl=args.blocks,  circ=args.circular, overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise  
+      else:
+        hist, vf = spoof.lbphist_facenorm(frame, args.lbptype, locations[k], sz, args.elbptype, numbl=args.blocks,  circ=args.circular, overlap=args.overlap, bbxsize_filter=args.facesize_filter) # vf = 1 if it was a valid frame, 0 otherwise
       numvf = numvf + vf
       if vf == 1: # if it is a valid frame, add this histogram into the accumulated histogram
         data = data + hist # accumulate the histograms of all the frames one by one

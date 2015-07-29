@@ -69,10 +69,11 @@ def main():
   print "Loading input files..."
   # loading the input files
   database = args.cls(args)
+  
   process_train_real, process_train_attack = database.get_train_data()
   process_devel_real, process_devel_attack = database.get_devel_data()
   process_test_real, process_test_attack = database.get_test_data()
-
+  
   # create the full datasets from the file data
   train_real = sm.create_full_dataset(args.inputdir, process_train_real); train_attack = sm.create_full_dataset(args.inputdir, process_train_attack); 
   devel_real = sm.create_full_dataset(args.inputdir, process_devel_real); devel_attack = sm.create_full_dataset(args.inputdir, process_devel_attack); 

@@ -202,3 +202,40 @@ def lbphist_facenorm(frame, lbptype, bbx, sz, elbptype='regular', radius=1, neig
     return finalhist, vf # the last argument is 1 if the frame was valid and 0 otherwise
   return  numpy.array(numbl * numbl * lbphistlength[lbptype] * [numpy.NaN]), 0 # return histogram with Nans if there is no valid bounding box (example: detected face in the frame)
 
+
+
+def lbphist_face(frame, lbptype, bbx, elbptype='regular', radius=1, neighbors=8, circ=False, numbl=1, overlap=False, bbxsize_filter=0):
+  """Calculates the normalized 3x3 LBP histogram over a given bounding box (bbx) in an image (around the detected face for example), using the bob LBP operator. If bbx is None or invalid, returns an empty histogram.
+
+  Keyword Parameters:
+
+  frame
+    The frame as a gray-scale image
+  lbptype
+    The type of the LBP operator (regular, uniform or riu2)
+  bbx
+    the face bounding box
+  elbptype
+    The type of extended version of LBP (regular if not extended version is used, otherwise transitional, direction_coded or modified)
+  radius
+    The radius of the circle on which the points are taken (for circular LBP)
+  neighbors
+    The number of points around the central point on which LBP is computed (4, 8, 16)
+  circ
+    True if circular LBP is needed, False otherwise
+  numbl
+    Square root of the number of blocks the frame is to be divided into (ex. 9 blocks => numbl = 3)
+  overlap
+    True for overlapping blocks (hardcoded to 16 pixels overlap, as in the paper "Face Spoofing Detection from Single Images Using Micro-texture Analysis" - Maatta, Hadid, Pietikainen))
+  bbxsize_filter
+    Considers as invalid all the bounding boxes with size smaller then this value
+  """
+  # hardcoding the number of bins for the LBP variants
+  if neighbors == 16:   lbphistlength = {'regular':65536, 'riu2':18, 'uniform':243}
+  else:  lbphistlength = {'regular':256, 'riu2':10, 'uniform':59}
+
+  if bbx and bbx.is_valid() and bbx.height > bbxsize_filter:
+    cutframe = frame[bbx.y:(bbx.y+bbx.height),bbx.x:(bbx.x+bbx.width)] # cutting the box region
+    finalhist, vf = lbphist_frame(cutframe, lbptype, elbptype, radius, neighbors, circ, numbl, overlap)
+    return finalhist, vf # the last argument is 1 if the frame was valid and 0 otherwise
+  return  numpy.array(numbl * numbl * lbphistlength[lbptype] * [numpy.NaN]), 0 # return histogram with Nans if there is no valid bounding box (example: detected face in the frame)
