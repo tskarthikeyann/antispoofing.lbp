@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # Ivana Chingovska <ivana.chingovska@idiap.ch>
-# Sun Jul  8 20:35:55 CEST 2012
-#
+# Thu 16 Apr 13:27:19 CEST 2015
 # Copyright (C) 2011-2013 Idiap Research Institute, Martigny, Switzerland
 #
 # This program is free software: you can redistribute it and/or modify
@@ -48,19 +47,24 @@ setup(
       "bob.db.base", #1.1.0
       "bob.db.replay", # Replay-Attack database
       "bob.db.casia_fasd", # CASIA database
+      #"bob.db.msu_mfsd_mod", # MSU MFSD database
       #"xbob.db.maskattack", # 3DMAD
       "antispoofing.utils",  # Utils Package
+      "pymediainfo",
     ],
 
     entry_points={
       'console_scripts': [
         'calclbp.py = antispoofing.lbp.script.calclbp:main',
         'calcframelbp.py = antispoofing.lbp.script.calcframelbp:main',
+        'calcframelbp_multiscale.py = antispoofing.lbp.script.calcframelbp_multiscale:main',
+        'calchog.py = antispoofing.lbp.script.calchog:main',
         'mkhistmodel.py = antispoofing.lbp.script.mkhistmodel:main',
         'cmphistmodels.py = antispoofing.lbp.script.cmphistmodels:main',
         'ldatrain_lbp.py = antispoofing.lbp.script.ldatrain_lbp:main',
         'svmtrain_lbp.py = antispoofing.lbp.script.svmtrain_lbp:main',
         'svmeval_lbp.py = antispoofing.lbp.script.svmeval_lbp:main',
+        #'check_rotated_videos.py = antispoofing.lbp.script.check_rotated_videos:main',
         ],
       },
 

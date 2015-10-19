@@ -125,7 +125,6 @@ def main():
       hog.disable_block_normalization()
     hog_feat_shape = hog.output_shape()
     
-    import ipdb; ipdb.set_trace()
     histdata = numpy.ndarray((0, hog_feat_shape[0] * hog_feat_shape[1] * hog_feat_shape[2]), 'float64')
 
     numvf = 0 # number of valid frames in the video (will be smaller then the total number of frames if a face is not detected or a very small face is detected in a frame when face lbp are calculated
