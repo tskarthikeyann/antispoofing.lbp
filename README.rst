@@ -144,9 +144,9 @@ development and test videos to the model histogram and writing the results.
 
 The script to use for creating the histogram model is
 ``./bin/mkhistmodel.py``.  It expects that the LBP features of the videos are
-stored in a folder ``./bin/lbp_features``. The model histogram will be written
+stored in a folder ``./lbp_features``. The model histogram will be written
 in the default output folder ``./res``. You can change this default features by
-setting the input arguments. To execute this script fro Replay-Attack, just run::
+setting the input arguments. To execute this script for Replay-Attack, just run::
 
   $ ./bin/mkhistmodel.py replay
 
