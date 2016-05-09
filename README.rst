@@ -232,7 +232,7 @@ The results in Table III are obtained by the same commands, using the correspond
 The results in Table IV for LDA and SVM classification are obtained by the following two commands, respectively::
 
   $ ./bin/ldatrain_lbp.py -v features/regular -d scores/regular -n replay
-  $ ./bin/svmtrain_lbp.py -v features/regular -d scores/regular -r replay
+  $ ./bin/svmtrain_lbp.py -v features/regular -d scores/regular --sn -r replay
      
 The results for the CASIA-FASD database can be obtained in the same way, by specifying the ``casia`` parameter at the end of the commands. Note that the results for CASIA-FASD are reported on per-block basis, and using 5-fold cross validation. This means that the results need to be generated 5 times, training with different fold, which can be specified as an argument as well.
 
