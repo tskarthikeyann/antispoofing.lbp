@@ -153,7 +153,7 @@ setting the input arguments. To execute this script for Replay-Attack, just run:
 The script for performing Chi-2 histogram comparison is
 ``./bin/cmphistmodels.py``, and it assumes that the model histogram has been
 already created. It makes use of the utility script ``spoof/chi2.py``. The default input directory is
-``./lbp_features``, while the default input directoru for the histogram model
+``./lbp_features``, while the default input directory for the histogram model
 as well as default output directory is ``./res``. To execute this script for Replay-Attack, just
 run:: 
 
@@ -232,7 +232,7 @@ The results in Table III are obtained by the same commands, using the correspond
 The results in Table IV for LDA and SVM classification are obtained by the following two commands, respectively::
 
   $ ./bin/ldatrain_lbp.py -v features/regular -d scores/regular -n replay
-  $ ./bin/svmtrain_lbp.py -v features/regular -d scores/regular -n -r replay  
+  $ ./bin/svmtrain_lbp.py -v features/regular -d scores/regular -r replay
      
 The results for the CASIA-FASD database can be obtained in the same way, by specifying the ``casia`` parameter at the end of the commands. Note that the results for CASIA-FASD are reported on per-block basis, and using 5-fold cross validation. This means that the results need to be generated 5 times, training with different fold, which can be specified as an argument as well.
 
